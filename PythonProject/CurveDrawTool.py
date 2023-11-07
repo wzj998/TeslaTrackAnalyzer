@@ -39,7 +39,7 @@ def draw_x_total_time_curves(df, lap_start, lap_end, cols, title='Total Time Cur
 
 
 # use lap time as x-axis
-def draw_x_lap_time_curves(df, laps_2_draw, cols, title='Lap Time Curves'):
+def draw_x_lap_time_curves_same_continues_laps(df, laps_2_draw, cols, title='Lap Time Curves'):
     # extract data for laps to draw
     df_laps_2_draw = df[df[COL_NAME_LAP].isin(laps_2_draw)]
 
@@ -80,8 +80,8 @@ def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols):
         ax.legend()
 
 
-def draw_x_lap_checkpoint_dist_curves(df, laps_2_draw, cols,
-                                      title='Lap Checkpoint Dist Curves'):
+def draw_x_lap_checkpoint_dist_curves_same_continues_laps(df, laps_2_draw, cols,
+                                                          title='Lap Checkpoint Dist Curves'):
     # extract data for laps to draw
     df_laps_2_draw = df[df[COL_NAME_LAP].isin(laps_2_draw)].copy()  # 保险起见，先复制一份
 

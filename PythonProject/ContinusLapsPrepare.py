@@ -74,7 +74,8 @@ def add_x_m_y_m_col(df, longtitude_origin, latitude_origin, altitude):
                             COL_NAME_LATITUDE] - latitude_origin) * math.pi / 180 * earth_radius_2_use
 
 
-def get_timing_line_x_y_m(df):
-    # 找到第一次lap变化的那行，前一行的COL_NAME_X_M就是timing line的x坐标，前一行的COL_NAME_Y_M就是timing line的y坐标
-    df_timing_line = df[df[COL_NAME_LAP].diff() >= 1]
-    return df_timing_line.iloc[-1][COL_NAME_X_M], df_timing_line.iloc[-1][COL_NAME_Y_M]
+def get_avg_timing_line_x_y_m(df):
+    rows_lap_diff = df[df[COL_NAME_LAP].diff() >= 1]
+    avg_x_m = rows_lap_diff[COL_NAME_X_M].mean()
+    avg_y_m = rows_lap_diff[COL_NAME_Y_M].mean()
+    return avg_x_m, avg_y_m

@@ -99,7 +99,7 @@ def draw_gps_track(continus_laps, lap_start, lap_end,
         if b_contain_last_back_lap:
             cool_laps_set.add(laps_2_draw[-1])
     fig, ax, slider = draw_gps_track_by_laps(df_laps_2_draw,
-                                             continus_laps.timing_line_x_m, continus_laps.timing_line_y_m,
+                                             continus_laps.avg_timing_line_x_m, continus_laps.avg_timing_line_y_m,
                                              cool_laps_set)
     fig.suptitle(title)
     return fig, ax, slider

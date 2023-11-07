@@ -16,7 +16,7 @@ class ContinusLaps:
         longtitude_start = df.iloc[0][COL_NAME_LONGITUDE]
         latitude_start = df.iloc[0][COL_NAME_LATITUDE]
         add_x_m_y_m_col(df, longtitude_start, latitude_start, altitude)
-        timing_line_x_m, timing_line_y_m = get_timing_line_x_y_m(df)
+        avg_timing_line_x_m, avg_timing_line_y_m = get_avg_timing_line_x_y_m(df)
 
         self.laps = laps
         self.laptimes = laptimes
@@ -25,9 +25,9 @@ class ContinusLaps:
         self.validlap_times_dict_sorted = dict(sorted(self.validlaptimes.items(), key=lambda k: k[1]))
         self.longtitude_start = longtitude_start
         self.latitude_start = latitude_start
+        self.avg_timing_line_x_m = avg_timing_line_x_m
+        self.avg_timing_line_y_m = avg_timing_line_y_m
         self.altitude = altitude
-        self.timing_line_x_m = timing_line_x_m
-        self.timing_line_y_m = timing_line_y_m
         self.df = df
 
 
