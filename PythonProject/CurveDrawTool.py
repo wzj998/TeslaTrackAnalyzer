@@ -40,7 +40,7 @@ def draw_x_total_time_curves(df, lap_start, lap_end, cols, title='Total Time Cur
 
 
 # use lap time as x-axis
-def draw_x_lap_time_curves_same_continues_laps(df, laps_2_draw, cols, title='Lap Time Curves'):
+def draw_x_lap_time_curves_same_continus_laps(df, laps_2_draw, cols, title='Lap Time Curves'):
     # extract data for laps to draw
     df_laps_2_draw = df[df[COL_NAME_LAP].isin(laps_2_draw)]
 
@@ -83,7 +83,7 @@ def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols, peroid_index=-
         ax.legend()
 
 
-def draw_x_lap_checkpoint_dist_curves_same_continues_laps(continus_laps, laps_2_draw, cols,
+def draw_x_lap_checkpoint_dist_curves_same_continus_laps(continus_laps, laps_2_draw, cols,
                                                           title='Lap Checkpoint Dist Curves'):
     # extract data for laps to draw
     df = continus_laps.df
@@ -103,7 +103,7 @@ def draw_x_lap_checkpoint_dist_curves_same_continues_laps(continus_laps, laps_2_
     # has no reverse or stop, and the gps data is accurate enough
     df_checkpoints_lap = dict_df_laps_2_draw[checkpoints_lap]
     if len(df_checkpoints_lap) <= 2:
-        raise Exception('len(df_checkpoints_lap) <= 2 in draw_x_lap_checkpoint_dist_curves_same_continues_laps')
+        raise Exception('len(df_checkpoints_lap) <= 2 in draw_x_lap_checkpoint_dist_curves_same_continus_laps')
     interpolate_x_m_y_m(df_checkpoints_lap)
     # print(df_checkpoints_lap.to_string())
     # last and lastlast x_m and y_m should be different
@@ -112,7 +112,7 @@ def draw_x_lap_checkpoint_dist_curves_same_continues_laps(continus_laps, laps_2_
             df_checkpoints_lap.iloc[len(df_checkpoints_lap) - 1][COL_NAME_Y_M] == \
             df_checkpoints_lap.iloc[len(df_checkpoints_lap) - 2][COL_NAME_Y_M]:
         raise Exception('df_checkpoints_lap last and last - 1 are the same in '
-                        'draw_x_lap_checkpoint_dist_curves_same_continues_laps')
+                        'draw_x_lap_checkpoint_dist_curves_same_continus_laps')
     b_laps_2_draw_timing_line_same = [True] * len(laps_2_draw)
     draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
                                 laps_2_draw, b_laps_2_draw_timing_line_same,
@@ -342,7 +342,7 @@ def quick_new_and_connect_cursor(fig, axs):
     return cc
 
 
-def draw_x_lap_checkpoint_dist_curves_diff_continues_laps_all_same_timeing_line(list_2_compare, cols):
+def draw_x_lap_checkpoint_dist_curves_diff_continus_laps_all_same_timeing_line(list_2_compare, cols):
     tuple_checkpoints = list_2_compare[0]
     continus_laps_checkpoints = tuple_checkpoints[0]
     for tuple_now in list_2_compare:
