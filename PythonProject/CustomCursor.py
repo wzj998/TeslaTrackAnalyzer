@@ -35,3 +35,11 @@ class CustomCursor(object):
         for ax in self.items[:, 0]:
             if self.focus == ax.get_gid():
                 self.items[self.focus, 2].set_visible(False)
+
+
+def quick_new_and_connect_cursor(fig, axs):
+    # Add cursor
+    cc = CustomCursor(axs, color='blue', xlimits=[0, 100], ylimits=[0, 100])
+    fig.canvas.mpl_connect('motion_notify_event', cc.show_xy)
+    fig.canvas.mpl_connect('axes_leave_event', cc.hide_y)
+    return cc

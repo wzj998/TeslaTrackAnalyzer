@@ -1,3 +1,5 @@
+import datetime
+
 import numpy as np
 from sklearn.cluster import KMeans
 
@@ -61,3 +63,7 @@ def generate_cool_laps_set(laps_2_draw, laptimes: dict):
             ans.add(lap)
 
     return ans
+
+
+def get_dict_time_str_2_show(laptimes: dict):
+    return {lap: datetime.datetime.strftime(laptimes[lap], '%H:%M:%S.%f') for lap in laptimes}

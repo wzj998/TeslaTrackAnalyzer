@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import ContinusLaps
 import Lap
 from ContinusLapsConsts import *
-from CustomCursor import CustomCursor
+import CustomCursor
 from InterpolateTool import interpolate_x_m_y_m
 from MyMath import get_dist_squared, get_dist
 
@@ -37,7 +37,7 @@ def draw_x_total_time_curves(df, lap_start, lap_end, cols, title='Total Time Cur
     fig.suptitle(title)
 
     # cc needs to be returned to avoid being garbage collected
-    return fig, axs, quick_new_and_connect_cursor(fig, axs)
+    return fig, axs, CustomCursor.quick_new_and_connect_cursor(fig, axs)
 
 
 # use lap time as x-axis
@@ -60,7 +60,7 @@ def draw_x_lap_time_curves_same_continus_laps(df, laps_2_draw, cols, title='Lap 
     fig.suptitle(title)
 
     # cc needs to be returned to avoid being garbage collected
-    return fig, axs, quick_new_and_connect_cursor(fig, axs)
+    return fig, axs, CustomCursor.quick_new_and_connect_cursor(fig, axs)
 
 
 def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols, peroid_index=-1):
@@ -91,15 +91,24 @@ def get_str_label_start(lap, peroid_index):
 
 def draw_x_lap_checkpoint_dist_curves_same_continus_laps(continus_laps, laps_2_draw, cols,
                                                          title='Lap Checkpoint Dist Curves'):
-    laps = []
-    for i_lap in laps_2_draw:
-        lap = Lap.Lap(continus_laps, 0, i_lap)
-        ContinusLaps.add_x_m_y_m_col(lap.df_lap, continus_laps.longtitude_start, continus_laps.latitude_start,
-                                     continus_laps.altitude)
-        laps.append(lap)
+    laps = get_laps_from_continus_laps_and_laps_2_draw(continus_laps, laps_2_draw)
+    return draw_x_lap_checkpoint_dist_curves_diff_continus_laps_all_same_timeing_line(laps, cols, title)
 
-    # use first lap in laps_2_draw to generate checkpoints
-    checkpoints_lap = laps[0]
+
+def draw_and_return_checkpoints_dist_same_timing_line(b_laps_2_draw_timing_line_same, cols, df_checkpoints_lap, laps,
+                                                      title):
+    fig, axs = plt.subplots(len(cols), 1, sharex='all', figsize=(12, 8))
+    draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
+                                laps, b_laps_2_draw_timing_line_same, cols)
+    plt.xlabel('Distance (m)')
+    for ax in axs:
+        ax.grid()
+    fig.suptitle(title)
+    # cc needs to be returned to avoid being garbage collected
+    return fig, axs, CustomCursor.quick_new_and_connect_cursor(fig, axs)
+
+
+def get_df_checkpoints_lap(checkpoints_lap):
     # we asume that in checkpoints_lap, the car is always moving by correct direction in the track,
     # has no reverse or stop, and the gps data is accurate enough
     df_checkpoints_lap = checkpoints_lap.df_lap
@@ -114,18 +123,15 @@ def draw_x_lap_checkpoint_dist_curves_same_continus_laps(continus_laps, laps_2_d
             df_checkpoints_lap.iloc[len(df_checkpoints_lap) - 2][COL_NAME_Y_M]:
         raise Exception('df_checkpoints_lap last and last - 1 are the same in '
                         'draw_x_lap_checkpoint_dist_curves_same_continus_laps')
-    b_laps_2_draw_timing_line_same = [True] * len(laps)
+    return df_checkpoints_lap
 
-    fig, axs = plt.subplots(len(cols), 1, sharex='all', figsize=(12, 8))
-    draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
-                                laps, b_laps_2_draw_timing_line_same, cols)
-    plt.xlabel('Distance (m)')
-    for ax in axs:
-        ax.grid()
-    fig.suptitle(title)
 
-    # cc needs to be returned to avoid being garbage collected
-    return fig, axs, quick_new_and_connect_cursor(fig, axs)
+def get_laps_from_continus_laps_and_laps_2_draw(continus_laps, laps_2_draw):
+    laps = []
+    for i_lap in laps_2_draw:
+        lap = Lap.Lap(continus_laps, 0, i_lap)
+        laps.append(lap)
+    return laps
 
 
 def generate_dist_from_start_by_checkpoint_index(df_checkpoints_lap) -> list:
@@ -206,10 +212,12 @@ def get_dict_checkpoints_reached_by_index_same_timing_line(df_checkpoints_lap, d
                 else:
                     dict_checkpoints_reached_by_index[i].append(index_checkpoint_will_reach)
                 index_checkpoint_will_reach += 1
-                if index_checkpoint_will_reach >= len(df_checkpoints_lap) - 1:
-                    break
             else:
                 break
+            if index_checkpoint_will_reach >= len(df_checkpoints_lap) - 1:
+                break
+        if index_checkpoint_will_reach >= len(df_checkpoints_lap) - 1:
+            break
 
     # if df_checkpoints_lap last and last - 1 in same position, 说明预处理工作没做好
     if df_lap.iloc[len(df_lap) - 1][COL_NAME_X_M] == \
@@ -232,11 +240,13 @@ def draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
     x_min = None
     x_max = None
     dist_from_start_by_checkpoint_index = generate_dist_from_start_by_checkpoint_index(df_checkpoints_lap)
-    # print('dist_from_start_by_checkpoint_index:', dist_from_start_by_checkpoint_index)
-    # for lap in laps_2_draw:
-    #     dict_df_laps_2_draw[lap] = __add_dist_and_time_delta_points(df_checkpoints_lap, dict_df_laps_2_draw[lap],
-    #                                                                 dist_from_start_by_checkpoint_index)
-    #     print('lap:', lap, 'finished')
+
+    # for i_lap in range(len(laps)):
+    #     rst = __process_lap(i_lap, laps[i_lap], df_checkpoints_lap,
+    #                         dist_from_start_by_checkpoint_index,
+    #                         b_laps_2_draw_timing_line_same[i_lap])
+    #     laps[i_lap].df_lap = rst[1]
+
     # use multiprocess to speed up
     num_process = min(multiprocessing.cpu_count(), len(laps))
     pool = Pool(num_process)
@@ -255,6 +265,7 @@ def draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
     for result in results:
         i_lap, df_lap_new = result.get()
         laps[i_lap].df_lap = df_lap_new
+
     print("All laps processed.")
 
     for i_lap in range(len(laps)):
@@ -321,17 +332,19 @@ def update_x_min_y_min(df_lap, x_col_name_2_use, x_max, x_min):
     return x_max, x_min
 
 
-def quick_new_and_connect_cursor(fig, axs):
-    # Add cursor
-    cc = CustomCursor(axs, color='blue', xlimits=[0, 100], ylimits=[0, 100])
-    fig.canvas.mpl_connect('motion_notify_event', cc.show_xy)
-    fig.canvas.mpl_connect('axes_leave_event', cc.hide_y)
-    return cc
+def draw_x_lap_checkpoint_dist_curves_diff_continus_laps_all_same_timeing_line(laps, cols,
+                                                                               title='Lap Checkpoint Dist Curves'):
+    lap_checkpoints = laps[0]
+    add_col_x_m_y_m_by_lap_checkpoints(laps, lap_checkpoints)
+    # we use first lap in laps to generate checkpoints
+    df_checkpoints_lap = get_df_checkpoints_lap(lap_checkpoints)
+    return draw_and_return_checkpoints_dist_same_timing_line([True] * len(laps), cols, df_checkpoints_lap,
+                                                             laps, title)
 
 
-def draw_x_lap_checkpoint_dist_curves_diff_continus_laps_all_same_timeing_line(list_2_compare, cols):
-    tuple_checkpoints = list_2_compare[0]
-    continus_laps_checkpoints = tuple_checkpoints[0]
-    for tuple_now in list_2_compare:
-        continus_laps: ContinusLaps = tuple_now[0]
-        print(continus_laps.longtitude_start, continus_laps.latitude_start)
+def add_col_x_m_y_m_by_lap_checkpoints(laps, lap_checkpoints):
+    for lap in laps:
+        ContinusLaps.add_x_m_y_m_col(lap.df_lap,
+                                     lap_checkpoints.continus_laps.longtitude_start,
+                                     lap_checkpoints.continus_laps.latitude_start,
+                                     lap_checkpoints.continus_laps.altitude)
