@@ -25,7 +25,7 @@ def main():
 
 
 def example_for_continus_laps(continus_laps):
-    print(continus_laps.df.columns)
+    # print(continus_laps.df.columns)
     print(continus_laps.df.to_string(max_rows=20))
     print('laps:', continus_laps.laps)
     print('laptimes:', continus_laps.laptimes)
