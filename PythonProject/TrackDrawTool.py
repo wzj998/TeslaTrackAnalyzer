@@ -34,8 +34,9 @@ def update_slider_text(slider):
     slider.valtext.set_text(val_datetime.strftime('%M:%S.%f'))
 
 
-def draw_gps_track_by_laps(df_laps_2_draw, timing_line_x_m, timing_line_y_m,
-                           cool_laps_set=None):
+def draw_gps_track_by_laps_cool_laps_set(df_laps_2_draw,
+                                         timing_line_x_m, timing_line_y_m,
+                                         cool_laps_set=None):
     if cool_laps_set is None:
         cool_laps_set = set()
     print('push_laps_set:', set(df_laps_2_draw[COL_NAME_LAP].unique()) - cool_laps_set)
@@ -84,8 +85,11 @@ def draw_gps_track(continus_laps, lap_start, lap_end,
                    b_auto_generate_cool_laps_set, b_contain_first_enter_lap, b_contain_last_back_lap,
                    title='GPS Track'):
     df = continus_laps.df
-    df_laps_2_draw = df[(df[COL_NAME_LAP] >= lap_start) & (df[COL_NAME_LAP] <= lap_end)]
+    df_laps_2_draw = df[(df[COL_NAME_LAP] >= lap_start) & (df[COL_NAME_LAP] <= lap_end)].copy()
     laps_2_draw = df_laps_2_draw[COL_NAME_LAP].unique()
+    ContinusLaps.add_x_m_y_m_col(df_laps_2_draw, continus_laps.longtitude_start, continus_laps.latitude_start,
+                                 continus_laps.altitude)
+    avg_timing_line_x_m, avg_timing_line_y_m = ContinusLaps.get_avg_timing_line_x_y_m(df_laps_2_draw)
     cool_laps_set = None
     if b_auto_generate_cool_laps_set:
         laps_2_kmeans = laps_2_draw.copy()
@@ -98,9 +102,9 @@ def draw_gps_track(continus_laps, lap_start, lap_end,
             cool_laps_set.add(laps_2_draw[0])
         if b_contain_last_back_lap:
             cool_laps_set.add(laps_2_draw[-1])
-    fig, ax, slider = draw_gps_track_by_laps(df_laps_2_draw,
-                                             continus_laps.avg_timing_line_x_m, continus_laps.avg_timing_line_y_m,
-                                             cool_laps_set)
+    fig, ax, slider = draw_gps_track_by_laps_cool_laps_set(df_laps_2_draw,
+                                                           avg_timing_line_x_m, avg_timing_line_y_m,
+                                                           cool_laps_set)
     fig.suptitle(title)
     return fig, ax, slider
 

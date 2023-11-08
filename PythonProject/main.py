@@ -13,8 +13,13 @@ def main():
     continus_lapss = [ContinusLaps.ContinusLaps(pd.read_csv(csv_path)) for csv_path in csv_paths]
 
     example_for_continus_laps(continus_lapss[0])
-    # _, _, cc_lap_x_checkpoint = CurveDrawTool.draw_x_lap_checkpoint_dist_curves_diff_continues_laps(
-    #
+
+    # # compare different continues laps' fastest lap
+    # _, _, cc_lap_x_checkpoint = CurveDrawTool.draw_x_lap_checkpoint_dist_curves_diff_continues_laps_all_same_timeing_line(
+    #     [
+    #         (continus_lapss[0], list(continus_lapss[0].validlap_times_dict_sorted.keys())[0]),
+    #         (continus_lapss[1], list(continus_lapss[1].validlap_times_dict_sorted.keys())[0])
+    #     ],
     #     [
     #         COL_NAME_TIME_DELTA,
     #         COL_NAME_SPEED_KMH,
@@ -33,7 +38,7 @@ def example_for_continus_laps(continus_laps):
     # get fisrt 2 laps to draw graph
     laps_2_draw = list(continus_laps.validlap_times_dict_sorted.keys())[:2]
     _, _, cc_lap_x_checkpoint = CurveDrawTool.draw_x_lap_checkpoint_dist_curves_same_continues_laps(
-        continus_laps.df, laps_2_draw,
+        continus_laps, laps_2_draw,
         [
             COL_NAME_TIME_DELTA,
             COL_NAME_SPEED_KMH,

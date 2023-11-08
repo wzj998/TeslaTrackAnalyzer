@@ -5,6 +5,7 @@ from multiprocessing import Pool
 import matplotlib.dates as mdates
 from matplotlib import pyplot as plt
 
+import ContinusLaps
 from ContinusLapsConsts import *
 from CustomCursor import CustomCursor
 from InterpolateTool import interpolate_x_m_y_m
@@ -61,13 +62,15 @@ def draw_x_lap_time_curves_same_continues_laps(df, laps_2_draw, cols, title='Lap
     return fig, axs, quick_new_and_connect_cursor(fig, axs)
 
 
-def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols):
+def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols, peroid_index=-1):
     x_col_name_2_use = COL_NAME_LAP_DATETIME
     x_min = None
     x_max = None
     for lap in laps_2_draw:
         df_lap = dict_df_laps_2_draw[lap]
-        str_label = 'Lap ' + str(lap)
+        str_label = 'Lap' + str(lap)
+        if peroid_index != -1:
+            str_label = 'Period' + str(peroid_index) + ' ' + str_label
         for i in range(len(cols)):
             axs[i].plot(df_lap[x_col_name_2_use], df_lap[cols[i]], label=str_label + ' ' + cols[i])
 
@@ -80,10 +83,13 @@ def draw_ax_lap_time(axs, laps_2_draw, dict_df_laps_2_draw, cols):
         ax.legend()
 
 
-def draw_x_lap_checkpoint_dist_curves_same_continues_laps(df, laps_2_draw, cols,
+def draw_x_lap_checkpoint_dist_curves_same_continues_laps(continus_laps, laps_2_draw, cols,
                                                           title='Lap Checkpoint Dist Curves'):
     # extract data for laps to draw
-    df_laps_2_draw = df[df[COL_NAME_LAP].isin(laps_2_draw)].copy()  # 保险起见，先复制一份
+    df = continus_laps.df
+    df_laps_2_draw = df[df[COL_NAME_LAP].isin(laps_2_draw)].copy()  # 先复制一份
+    ContinusLaps.add_x_m_y_m_col(df_laps_2_draw, continus_laps.longtitude_start, continus_laps.latitude_start,
+                                 continus_laps.altitude)
 
     fig, axs = plt.subplots(len(cols), 1, sharex='all', figsize=(12, 8))
 
@@ -334,3 +340,11 @@ def quick_new_and_connect_cursor(fig, axs):
     fig.canvas.mpl_connect('motion_notify_event', cc.show_xy)
     fig.canvas.mpl_connect('axes_leave_event', cc.hide_y)
     return cc
+
+
+def draw_x_lap_checkpoint_dist_curves_diff_continues_laps_all_same_timeing_line(list_2_compare, cols):
+    tuple_checkpoints = list_2_compare[0]
+    continus_laps_checkpoints = tuple_checkpoints[0]
+    for tuple_now in list_2_compare:
+        continus_laps: ContinusLaps = tuple_now[0]
+        print(continus_laps.longtitude_start, continus_laps.latitude_start)

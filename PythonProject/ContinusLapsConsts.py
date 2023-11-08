@@ -27,8 +27,8 @@ COL_NAME_TOTAL_DATETIME = 'Total Time (mm:ss.ms)'
 
 COL_NAME_LATITUDE = 'Latitude (decimal)'
 COL_NAME_LONGITUDE = 'Longitude (decimal)'
-COL_NAME_Y_M = 'y (m)'
-COL_NAME_X_M = 'x (m)'
+COL_NAME_Y_M = 'y (m)'  # only in copy of df
+COL_NAME_X_M = 'x (m)'  # only in copy of df
 
 COL_NAME_SPEED_MPH = 'Speed (MPH)'
 COL_NAME_SPEED_KMH = 'Speed (KMH)'
