@@ -1,6 +1,7 @@
 import math
 
 import pandas as pd
+from typing import List
 
 from ContinusLapsConsts import *
 
@@ -18,7 +19,7 @@ def add_lap_datetime_col(df):
 
 
 # must be called after calculate_every_lap_time
-def add_total_time_col(df, laps: list, lap_times: dict):
+def add_total_time_col(df, laps: List[int], lap_times: dict):
     df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 1, COL_NAME_TOTAL_MS, '')
     df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 2, COL_NAME_TOTAL_DATETIME, '')
     sum_ms_laps_b4 = 0
