@@ -4,12 +4,10 @@ from multiprocessing import Pool
 import matplotlib.dates as mdates
 from matplotlib import pyplot as plt
 
-import ContinusLaps
-import Lap
-from ContinusLapsConsts import *
-import CustomCursor
-from InterpolateTool import interpolate_x_m_y_m
-from MyMath import get_dist_squared, get_dist
+from Structures.ContinusLapsConsts import *
+from Structures import CustomCursor, ContinusLaps, Lap
+from Utils.InterpolateTool import interpolate_x_m_y_m
+from Utils.MyMath import get_dist_squared, get_dist
 
 
 # use total time as x-axis

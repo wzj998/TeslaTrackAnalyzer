@@ -2,8 +2,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.widgets import Slider
 
-import ContinusLaps
-from ContinusLapsConsts import *
+from Structures import ContinusLaps
+from Structures.ContinusLapsConsts import *
 
 
 def draw_on_ax(ax, df_laps_2_draw_copy, cool_laps_set, start_ms, end_ms, timing_line_x_m, timing_line_y_m):

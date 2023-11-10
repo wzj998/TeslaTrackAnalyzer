@@ -1,4 +1,4 @@
-from ContinusLapsConsts import *
+from Structures.ContinusLapsConsts import *
 
 
 def interpolate_x_m_y_m(df_lap):

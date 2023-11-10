@@ -1,9 +1,9 @@
-import ContinusLaps
-from ContinusLapsConsts import *
+from Structures.ContinusLaps import *
+from Structures.ContinusLapsConsts import *
 
 
 class Lap:
-    def __init__(self, continus_laps: ContinusLaps.ContinusLaps, continus_laps_index: int, lap_index: int):
+    def __init__(self, continus_laps: ContinusLaps, continus_laps_index: int, lap_index: int):
         self.continus_laps = continus_laps
         self.continus_laps_index = continus_laps_index
         self.lap_index = lap_index

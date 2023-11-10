@@ -3,7 +3,7 @@ import math
 import pandas as pd
 from typing import List
 
-from ContinusLapsConsts import *
+from Structures.ContinusLapsConsts import *
 
 
 def add_kmh_col(df):

@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 from sklearn.cluster import KMeans
 
-from ContinusLapsPrepare import *
+from Structures.ContinusLapsPrepare import *
 
 
 class ContinusLaps:
