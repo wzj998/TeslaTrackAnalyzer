@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 from multiprocessing import Pool
 
@@ -13,8 +14,7 @@ def generate_samecolor_np(width, height, color):
     return np.full((height, width, 3), color, dtype=np.uint8)
 
 
-def draw_text(img, text, x, y, font, text_color=(255, 255, 255)):
-    draw = ImageDraw.Draw(img)
+def draw_text(draw, text, x, y, font, text_color=(255, 255, 255)):
     draw.text((x, y), text, font=font, fill=text_color, stroke_width=2, stroke_fill=(0, 0, 0))
 
 
@@ -57,18 +57,22 @@ def generate_overlay_video(continus_lap: ContinusLaps.ContinusLaps,
             index_now += 1
         if not b_found_this_frame:
             break
-
     print(f'\rgenerate_overlay_video find index: 100%')
 
-    num_cpu = os.cpu_count()
+    print(f'\rgenerate_overlay_video really draw: 0%', end='')
+    num_processes = os.cpu_count()
     # split row_indexes_really_deal to num_cpu parts
-    row_indexes_really_deal_split = np.array_split(row_indexes_really_deal, num_cpu)
+    row_indexes_really_deal_split = np.array_split(row_indexes_really_deal, num_processes)
     # use multiprocessing to deal with rows_really_deal_split
-    pool = Pool(num_cpu)
+    pool = Pool(num_processes)
     results = []
+    manager = multiprocessing.Manager()
+    lock_finished_frames = manager.Lock()
+    finished_frames = manager.Value('i', 0)
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, img_back, df, row_indexes, font, num_frames))
+                                  args=(i_part, img_back, df, row_indexes, font, num_frames, num_processes,
+                                        lock_finished_frames, finished_frames))
         results.append(result)
     pool.close()
     pool.join()
@@ -77,29 +81,36 @@ def generate_overlay_video(continus_lap: ContinusLaps.ContinusLaps,
         img_paths.extend(result.get())
     print(f'\rgenerate_overlay_video really draw: 100%')
 
+    print(f'\rgenerate_overlay_video create ImageSequenceClip: 0%', end='')
     ans = ImageSequenceClip(
         img_paths,
         fps=fps,
     )
+    print(f'\rgenerate_overlay_video create ImageSequenceClip: 100%')
     return ans
 
 
-def generate_overlay_video_part(i_part, img_back, df, row_indexes, font, num_frames):
+def generate_overlay_video_part(_, img_back, df, row_indexes, font, num_frames, num_processes,
+                                lock_finished_frames, finished_frames):
     img_paths = []
+    img_width, img_height = img_back.size
     len_row_indexes = len(row_indexes)
     prgress_last_report = 0
+    i_last_report = 0
+    delta_progress_2_report = 0.01 * num_processes
     for i, index in enumerate(row_indexes):
         row = df.iloc[index]
 
         img = img_back.copy()
+        draw = ImageDraw.Draw(img)
 
         # show lap
         lap = row[COL_NAME_LAP]
-        draw_text(img, f'Lap {lap}', 10, 6, font)
+        draw_text(draw, f'Lap {lap}', 10 / 1280 * img_width, 6 / 960 * img_height, font)
         # show lap time
         lap_datetime = row[COL_NAME_LAP_DATETIME]
         str_mmssms_laptime = f'{lap_datetime.minute}:{lap_datetime.second:02}.{lap_datetime.microsecond // 1000:03}'
-        draw_text(img, str_mmssms_laptime, 10, 40, font)
+        draw_text(draw, str_mmssms_laptime, 10 / 1280 * img_width, 40 / 960 * img_height, font)
 
         # save img
         img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
@@ -108,8 +119,10 @@ def generate_overlay_video_part(i_part, img_back, df, row_indexes, font, num_fra
 
         # print progress of this part
         progress = (i + 1) / len_row_indexes
-        if progress - prgress_last_report >= 0.01:
-            print(f'generate_overlay_video draw part {i_part}: {progress * 100:.0f}%')
-            # TODO: show total progress
+        if progress - prgress_last_report >= delta_progress_2_report:
+            with lock_finished_frames:
+                finished_frames.value += i - i_last_report
+                print(f'\rgenerate_overlay_video really draw: {finished_frames.value / num_frames * 100:.0f}%', end='')
             prgress_last_report = progress
+            i_last_report = i
     return img_paths
