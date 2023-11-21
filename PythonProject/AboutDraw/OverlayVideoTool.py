@@ -3,9 +3,9 @@ import os
 from multiprocessing import Pool
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import ImageSequenceClip
+from PIL import Image, ImageFont
 
+from AboutDraw import OverlayImgTool
 from Structures import ContinusLaps
 from Structures.ContinusLapsConsts import *
 
@@ -14,13 +14,9 @@ def generate_samecolor_np(width, height, color):
     return np.full((height, width, 3), color, dtype=np.uint8)
 
 
-def draw_text(draw, text, x, y, font, text_color=(255, 255, 255)):
-    draw.text((x, y), text, font=font, fill=text_color, stroke_width=2, stroke_fill=(0, 0, 0))
-
-
-def generate_overlay_video(continus_lap: ContinusLaps.ContinusLaps,
-                           width, height, s_limit=None,
-                           backcolor=(0, 255, 0), fps=60, lap_start=1) -> ImageSequenceClip:
+def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
+                                     width, height, s_limit=None,
+                                     backcolor=(0, 255, 0), fps=60, lap_start=1) -> list:
     frame_ms_delta = 1000 / fps
 
     df = continus_lap.df
@@ -45,7 +41,8 @@ def generate_overlay_video(continus_lap: ContinusLaps.ContinusLaps,
     index_now = index_start
     index_last = df.index[-1]
     for i_frame in range(num_frames):
-        print(f'\rgenerate_overlay_video find index: {i_frame / num_frames * 100:.0f}%', end='')
+        if i_frame % 60 == 0:
+            print(f'\rgenerate_overlay_video find index: {i_frame / num_frames * 100:.0f}%', end='')
         b_found_this_frame = False
         total_ms = i_frame * frame_ms_delta
         while index_now <= index_last:
@@ -81,13 +78,7 @@ def generate_overlay_video(continus_lap: ContinusLaps.ContinusLaps,
         img_paths.extend(result.get())
     print(f'\rgenerate_overlay_video really draw: 100%')
 
-    print(f'\rgenerate_overlay_video create ImageSequenceClip: 0%', end='')
-    ans = ImageSequenceClip(
-        img_paths,
-        fps=fps,
-    )
-    print(f'\rgenerate_overlay_video create ImageSequenceClip: 100%')
-    return ans
+    return img_paths
 
 
 def generate_overlay_video_part(_, img_back, df, row_indexes, font, num_frames, num_processes,
@@ -102,16 +93,7 @@ def generate_overlay_video_part(_, img_back, df, row_indexes, font, num_frames, 
         row = df.iloc[index]
 
         img = img_back.copy()
-        draw = ImageDraw.Draw(img)
-
-        # show lap
-        lap = row[COL_NAME_LAP]
-        draw_text(draw, f'Lap {lap}', 10 / 1280 * img_width, 6 / 960 * img_height, font)
-        # show lap time
-        lap_datetime = row[COL_NAME_LAP_DATETIME]
-        str_mmssms_laptime = f'{lap_datetime.minute}:{lap_datetime.second:02}.{lap_datetime.microsecond // 1000:03}'
-        draw_text(draw, str_mmssms_laptime, 10 / 1280 * img_width, 40 / 960 * img_height, font)
-
+        OverlayImgTool.draw_overlays_on_img(img, row, img_width, img_height, font)
         # save img
         img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
         img.save(img_path)

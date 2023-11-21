@@ -1,5 +1,7 @@
 import math
 
+EPS = 1e-6
+
 
 def get_dist_squared(x_m, y_m, x_m_last, y_m_last):
     return (x_m - x_m_last) ** 2 + (y_m - y_m_last) ** 2
