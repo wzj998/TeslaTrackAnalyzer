@@ -14,12 +14,15 @@ def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power
 
     # show lap
     lap = row[COL_NAME_LAP]
-    draw_text(draw, f'Lap {lap}', 10, 6, font, x_ratio, y_ratio)
-
+    draw_text(draw, f'Lap {lap}', 20, 14, font, x_ratio, y_ratio)
     # show lap time
     lap_datetime = row[COL_NAME_LAP_DATETIME]
     str_mmssms_laptime = f'{lap_datetime.minute}:{lap_datetime.second:02}.{lap_datetime.microsecond // 1000:03}'
-    draw_text(draw, str_mmssms_laptime, 10, 40, font, x_ratio, y_ratio)
+    draw_text(draw, str_mmssms_laptime, 20, 44, font, x_ratio, y_ratio)
+
+    # show battery
+    battery = row[COL_NAME_STATE_OF_CHARGE]
+    draw_text(draw, f'{battery:.1f} %', 1206, 14, font, x_ratio, y_ratio)
 
     # draw power level
     power_level = row[COL_NAME_POWER_LEVEL]

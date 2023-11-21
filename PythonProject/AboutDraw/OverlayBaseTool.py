@@ -46,14 +46,14 @@ def draw_zf_bar(draw, power_level, power_level_min, power_level_max,
                (rect_back[1] - center_height_offset) * y_ratio,
                x_zero * x_ratio,
                (rect_back[3] + center_height_offset) * y_ratio),
-              fill=(0, 0, 0), width=1)
+              fill=(0, 0, 0), width=3)
 
 
 def draw_progress_rect(draw,
                        ratio, rect_left_x, rect_top_y, fill_color,
                        x_ratio, y_ratio,
                        rect_width=12, rect_height_max=80,
-                       border_color=(128, 128, 128), border_width=2):
+                       border_color=(0, 0, 0), border_width=3):
     rect_back = (rect_left_x,
                  rect_top_y,
                  rect_left_x + rect_width,
@@ -82,7 +82,7 @@ def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio,
                   center_y * y_ratio - radius,
                   center_x * x_ratio + radius,
                   center_y * y_ratio + radius),
-                 outline=(255, 255, 255), width=3)
+                 outline=(255, 255, 255), width=5)
 
     # draw 3 lines: left, right, down
     angle_left = (steer_angle - 180) / 180 * math.pi
@@ -94,23 +94,23 @@ def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio,
                center_y * y_ratio + radius * math.sin(angle_left),
                center_x * x_ratio + radius * math.cos(angle_right),
                center_y * y_ratio + radius * math.sin(angle_right)),
-              fill=(255, 255, 255), width=3)
+              fill=(255, 255, 255), width=5)
     draw.line((center_x * x_ratio,
                center_y * y_ratio,
                center_x * x_ratio + radius * math.cos(angle_down),
                center_y * y_ratio + radius * math.sin(angle_down)),
-              fill=(255, 255, 255), width=3)
+              fill=(255, 255, 255), width=5)
 
 
 def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio,
-                        radius=40, sphere_radius=5):
+                        radius=40, sphere_radius=7):
     # draw circle
     # 不会因为画面长宽变化，圆就不是圆了
     draw.ellipse((center_x * x_ratio - radius,
                   center_y * y_ratio - radius,
                   center_x * x_ratio + radius,
                   center_y * y_ratio + radius),
-                 outline=(255, 255, 255), width=3)
+                 outline=(255, 255, 255), width=5)
 
     # draw inner g sphere, max_accel_length对应radius
     # 不会因为画面长宽变化，圆就不是圆了
@@ -123,4 +123,4 @@ def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x,
                   y_sphere - sphere_radius,
                   x_sphere + sphere_radius,
                   y_sphere + sphere_radius),
-                 fill=(255, 255, 255), outline=(255, 255, 255), width=3)
+                 fill=(255, 255, 255), outline=(0, 0, 0), width=2)
