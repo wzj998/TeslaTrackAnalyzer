@@ -60,6 +60,8 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     num_processes = os.cpu_count()
     # split row_indexes_really_deal to num_cpu parts
     row_indexes_really_deal_split = np.array_split(row_indexes_really_deal, num_processes)
+    power_level_min = df[COL_NAME_POWER_LEVEL].min()
+    power_level_max = df[COL_NAME_POWER_LEVEL].max()
     # use multiprocessing to deal with rows_really_deal_split
     pool = Pool(num_processes)
     results = []
@@ -68,7 +70,8 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     finished_frames = manager.Value('i', 0)
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, img_back, df, row_indexes, font, num_frames, num_processes,
+                                  args=(i_part, img_back, df, power_level_min, power_level_max,
+                                        row_indexes, font, num_frames, num_processes,
                                         lock_finished_frames, finished_frames))
         results.append(result)
     pool.close()
@@ -81,8 +84,8 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-def generate_overlay_video_part(_, img_back, df, row_indexes, font, num_frames, num_processes,
-                                lock_finished_frames, finished_frames):
+def generate_overlay_video_part(_, img_back, df, power_level_min, power_level_max, row_indexes, font,
+                                num_frames, num_processes, lock_finished_frames, finished_frames):
     img_paths = []
     img_width, img_height = img_back.size
     len_row_indexes = len(row_indexes)
@@ -93,7 +96,8 @@ def generate_overlay_video_part(_, img_back, df, row_indexes, font, num_frames, 
         row = df.iloc[index]
 
         img = img_back.copy()
-        OverlayImgTool.draw_overlays_on_img(img, row, img_width, img_height, font)
+        OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
+                                            img_width, img_height, font)
         # save img
         img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
         img.save(img_path)
