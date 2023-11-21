@@ -58,21 +58,27 @@ def calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_
     return laps, lap_times_dict, validlaps
 
 
-def add_x_m_y_m_col(df, longtitude_origin, latitude_origin, altitude):
+def add_x_m_y_m_col(df, longtitude_origin, latitude_origin_in, altitude):
     df.insert(df.columns.get_loc(COL_NAME_LATITUDE) + 1, COL_NAME_Y_M, '')
     df.insert(df.columns.get_loc(COL_NAME_LONGITUDE) + 1, COL_NAME_X_M, '')
 
     # caculate distance x, y to start point, according to longitude, latitude and altitude
-    earth_radius_equator = 6378137.0
-    earth_radius_polar = 6356752.3
-    earth_radius_2_use = (earth_radius_equator * earth_radius_polar) / math.sqrt(
-        earth_radius_equator ** 2 * math.cos(latitude_origin) ** 2 + earth_radius_polar ** 2 * math.sin(
-            latitude_origin) ** 2) + altitude
+    earth_radius_2_use, latitude_origin_rad = calculate_earth_radius_2_use(altitude, latitude_origin_in)
     df[COL_NAME_X_M] = (df[
                             COL_NAME_LONGITUDE] - longtitude_origin) * math.pi / 180 * earth_radius_2_use * \
-                       math.cos(latitude_origin)
+                       math.cos(latitude_origin_rad)
     df[COL_NAME_Y_M] = (df[
-                            COL_NAME_LATITUDE] - latitude_origin) * math.pi / 180 * earth_radius_2_use
+                            COL_NAME_LATITUDE] - latitude_origin_rad) * math.pi / 180 * earth_radius_2_use
+
+
+def calculate_earth_radius_2_use(altitude, latitude_origin_in):
+    earth_radius_equator = 6378137.0
+    earth_radius_polar = 6356752.3
+    latitude_origin_rad = latitude_origin_in * math.pi / 180
+    earth_radius_2_use = (earth_radius_equator * earth_radius_polar) / math.sqrt(
+        earth_radius_equator ** 2 * math.cos(latitude_origin_rad) ** 2 + earth_radius_polar ** 2 * math.sin(
+            latitude_origin_rad) ** 2) + altitude
+    return earth_radius_2_use, latitude_origin_rad
 
 
 def get_avg_timing_line_x_y_m(df):

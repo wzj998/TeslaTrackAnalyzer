@@ -6,7 +6,7 @@ from Structures.ContinusLapsConsts import *
 
 
 def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power_level_max: int,
-                         img_width: int, img_height: int, font: ImageFont):
+                         img_width: int, img_height: int, font: ImageFont, g: float, max_accel_length: float):
     draw = ImageDraw.Draw(img)
 
     x_ratio = img_width / 1280
@@ -35,8 +35,10 @@ def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power
     draw_steering_wheel(draw, row[COL_NAME_STEER_ANGLE], 1170, top_progress_rect + 40, x_ratio, y_ratio)
 
     # draw g-force circle
-    draw_g_force_circle(draw, row[COL_NAME_LONG_ACCEL], row[COL_NAME_LAT_ACCEL], 1280 / 2, 840,
+    draw_g_force_circle(draw, row[COL_NAME_LONG_ACCEL], row[COL_NAME_LAT_ACCEL], max_accel_length, 1280 / 2, 840,
                         x_ratio, y_ratio)
+    accel_length = math.sqrt(row[COL_NAME_LONG_ACCEL] ** 2 + row[COL_NAME_LAT_ACCEL] ** 2)
+    draw_text(draw, f'{accel_length / g:.2f} g', 1280 / 2 - 19, 840 - 50 - 25, font, x_ratio, y_ratio)
     # show speed
     speed = row[COL_NAME_SPEED_KMH]
     draw_text(draw, f'{speed:.0f} km/h', 1280 / 2 - 15, 896, font, x_ratio, y_ratio)

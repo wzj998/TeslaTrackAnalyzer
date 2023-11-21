@@ -1,3 +1,4 @@
+import math
 import multiprocessing
 import os
 from multiprocessing import Pool
@@ -15,7 +16,7 @@ def generate_samecolor_np(width, height, color):
 
 
 def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
-                                     width, height, s_limit=None,
+                                     width, height, s_limit=None, altitude=0,
                                      backcolor=(0, 255, 0), fps=60, lap_start=1) -> list:
     frame_ms_delta = 1000 / fps
 
@@ -62,6 +63,23 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     row_indexes_really_deal_split = np.array_split(row_indexes_really_deal, num_processes)
     power_level_min = df[COL_NAME_POWER_LEVEL].min()
     power_level_max = df[COL_NAME_POWER_LEVEL].max()
+
+    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(altitude,
+                                                                                        continus_lap.latitude_start)
+    # 先根据万有引力计算g
+    m_earth = 5.9722 * 10 ** 24
+    g = 6.67408 * 10 ** -11 * m_earth / (earth_radius_2_use ** 2)
+    # 再计算自转加速度
+    w = 2 * math.pi / 86400 * math.cos(latitude_origin_rad)
+    a = w ** 2 * earth_radius_2_use
+    g -= a
+
+    max_accel_length = 0.1
+    for _, row in df.iterrows():
+        accel_length = math.sqrt(row[COL_NAME_LONG_ACCEL] ** 2 + row[COL_NAME_LAT_ACCEL] ** 2)
+        if accel_length > max_accel_length:
+            max_accel_length = accel_length
+
     # use multiprocessing to deal with rows_really_deal_split
     pool = Pool(num_processes)
     results = []
@@ -72,7 +90,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
         result = pool.apply_async(generate_overlay_video_part,
                                   args=(i_part, img_back, df, power_level_min, power_level_max,
                                         row_indexes, font, num_frames, num_processes,
-                                        lock_finished_frames, finished_frames))
+                                        lock_finished_frames, finished_frames, g, max_accel_length))
         results.append(result)
     pool.close()
     pool.join()
@@ -85,7 +103,8 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 
 
 def generate_overlay_video_part(_, img_back, df, power_level_min, power_level_max, row_indexes, font,
-                                num_frames, num_processes, lock_finished_frames, finished_frames):
+                                num_frames, num_processes, lock_finished_frames, finished_frames,
+                                g, max_accel_length):
     img_paths = []
     img_width, img_height = img_back.size
     len_row_indexes = len(row_indexes)
@@ -97,7 +116,7 @@ def generate_overlay_video_part(_, img_back, df, power_level_min, power_level_ma
 
         img = img_back.copy()
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
-                                            img_width, img_height, font)
+                                            img_width, img_height, font, g, max_accel_length)
         # save img
         img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
         img.save(img_path)

@@ -78,10 +78,10 @@ def draw_progress_rect(draw,
 
 def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio, radius=30):
     # draw circle
-    draw.ellipse(((center_x - radius) * x_ratio,
-                  (center_y - radius) * y_ratio,
-                  (center_x + radius) * x_ratio,
-                  (center_y + radius) * y_ratio),
+    draw.ellipse((center_x * x_ratio - radius,
+                  center_y * y_ratio - radius,
+                  center_x * x_ratio + radius,
+                  center_y * y_ratio + radius),
                  outline=(255, 255, 255), width=3)
 
     # draw 3 lines: left, right, down
@@ -89,22 +89,38 @@ def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio,
     angle_right = steer_angle / 180 * math.pi
     angle_down = (steer_angle + 90) / 180 * math.pi
     # draw left to right in one line
-    draw.line(((center_x + radius * math.cos(angle_left)) * x_ratio,
-               (center_y + radius * math.sin(angle_left)) * y_ratio,
-               (center_x + radius * math.cos(angle_right)) * x_ratio,
-               (center_y + radius * math.sin(angle_right)) * y_ratio),
+    # 不会因为画面长宽变化，圆就不是圆了
+    draw.line((center_x * x_ratio + radius * math.cos(angle_left),
+               center_y * y_ratio + radius * math.sin(angle_left),
+               center_x * x_ratio + radius * math.cos(angle_right),
+               center_y * y_ratio + radius * math.sin(angle_right)),
               fill=(255, 255, 255), width=3)
     draw.line((center_x * x_ratio,
                center_y * y_ratio,
-               (center_x + radius * math.cos(angle_down)) * x_ratio,
-               (center_y + radius * math.sin(angle_down)) * y_ratio),
+               center_x * x_ratio + radius * math.cos(angle_down),
+               center_y * y_ratio + radius * math.sin(angle_down)),
               fill=(255, 255, 255), width=3)
 
 
-def draw_g_force_circle(draw, long_accel, lat_accel, center_x, center_y, x_ratio, y_ratio, radius=40):
+def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio,
+                        radius=40, sphere_radius=5):
     # draw circle
-    draw.ellipse(((center_x - radius) * x_ratio,
-                  (center_y - radius) * y_ratio,
-                  (center_x + radius) * x_ratio,
-                  (center_y + radius) * y_ratio),
+    # 不会因为画面长宽变化，圆就不是圆了
+    draw.ellipse((center_x * x_ratio - radius,
+                  center_y * y_ratio - radius,
+                  center_x * x_ratio + radius,
+                  center_y * y_ratio + radius),
                  outline=(255, 255, 255), width=3)
+
+    # draw inner g sphere, max_accel_length对应radius
+    # 不会因为画面长宽变化，圆就不是圆了
+    # lat_accel是横向加速度，对应x轴，long_accel是纵向加速度，对应y轴
+    x_offset = -lat_accel / max_accel_length * radius
+    y_offset = long_accel / max_accel_length * radius
+    x_sphere = center_x * x_ratio + x_offset
+    y_sphere = center_y * y_ratio + y_offset
+    draw.ellipse((x_sphere - sphere_radius,
+                  y_sphere - sphere_radius,
+                  x_sphere + sphere_radius,
+                  y_sphere + sphere_radius),
+                 fill=(255, 255, 255), outline=(255, 255, 255), width=3)
