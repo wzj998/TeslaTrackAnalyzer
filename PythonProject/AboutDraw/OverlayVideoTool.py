@@ -1,6 +1,7 @@
 import math
 import multiprocessing
 import os
+import time
 from multiprocessing import Pool
 
 import numpy as np
@@ -63,7 +64,6 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
             break
     print(f'\rgenerate_overlay_video find index: 100%')
 
-    print(f'\rgenerate_overlay_video really draw: 0%', end='')
     num_processes = os.cpu_count()
     # split row_indexes_really_deal to num_cpu parts
     row_indexes_really_deal_split = np.array_split(row_indexes_really_deal, num_processes)
@@ -92,20 +92,23 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     manager = multiprocessing.Manager()
     lock_finished_frames = manager.Lock()
     finished_frames = manager.Value('i', 0)
+    print_really_draw_progress(0, 0, num_frames)
+    time_start_really_draw = time.time()
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
                                   args=(i_part, np_back, df, power_level_min, power_level_max,
                                         row_indexes,
                                         font_normal, font_small,
                                         num_frames, num_processes,
-                                        lock_finished_frames, finished_frames, g, max_accel_length))
+                                        lock_finished_frames, finished_frames, time_start_really_draw,
+                                        g, max_accel_length))
         results.append(result)
     pool.close()
     pool.join()
     # get img_paths
     for result in results:
         img_paths.extend(result.get())
-    print(f'\rgenerate_overlay_video really draw: 100%')
+    print_really_draw_progress(time.time() - time_start_really_draw, num_frames, num_frames)
 
     return img_paths
 
@@ -113,7 +116,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 # noinspection PyUnusedLocal
 def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_level_max, row_indexes,
                                 font_normal, font_small,
-                                num_frames, num_processes, lock_finished_frames, finished_frames,
+                                num_frames, num_processes, lock_finished_frames, finished_frames, time_start,
                                 g, max_accel_length):
     img_paths = []
     img_width, img_height = np_back.shape[1], np_back.shape[0]
@@ -144,7 +147,20 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
         if progress - prgress_last_report >= delta_progress_2_report:
             with lock_finished_frames:
                 finished_frames.value += i - i_last_report
-                print(f'\rgenerate_overlay_video really draw: {finished_frames.value / num_frames * 100:.0f}%', end='')
+                elapsed_time = time.time() - time_start
+                print_really_draw_progress(elapsed_time, finished_frames.value, num_frames)
             prgress_last_report = progress
             i_last_report = i
     return img_paths
+
+
+def print_really_draw_progress(elapsed_time, finished_frames_value, num_frames):
+    if finished_frames_value > 0:
+        remaining_time_str = f'remaining time: {elapsed_time / finished_frames_value * (num_frames - finished_frames_value):.0f}s'
+    else:
+        remaining_time_str = ''
+    print(f'\rgenerate_overlay_video really draw: '
+          f'{finished_frames_value / num_frames * 100:.0f}% '
+          f'elapsed time: {elapsed_time:.0f}s '
+          f'{remaining_time_str}',
+          end='')
