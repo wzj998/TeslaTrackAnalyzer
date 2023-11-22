@@ -52,6 +52,13 @@ COL_NAME_TIRE_SLIP_REAR_RIGHT = 'Tire Slip Rear Right (% est.)'
 
 COL_NAME_BRAKE_TEMP_FRONT_LEFT = 'Brake Temperature Front Left (% est.)'
 COL_NAME_BRAKE_TEMP_FRONT_RIGHT = 'Brake Temperature Front Right (% est.)'
+COL_NAME_BRAKE_TEMP_REAR_LEFT = 'Brake Temperature Rear Left (% est.)'
+COL_NAME_BRAKE_TEMP_REAR_RIGHT = 'Brake Temperature Rear Right (% est.)'
 
 COL_NAME_REAR_INVERTER_TEMP = 'Rear Inverter Temp (%)'
 COL_NAME_BATTERY_TEMP = 'Battery Temp (%)'
+
+COL_NAME_TIRE_PRESSURE_FRONT_LEFT = 'Tire Pressure Front Left (bar)'
+COL_NAME_TIRE_PRESSURE_FRONT_RIGHT = 'Tire Pressure Front Right (bar)'
+COL_NAME_TIRE_PRESSURE_REAR_LEFT = 'Tire Pressure Rear Left (bar)'
+COL_NAME_TIRE_PRESSURE_REAR_RIGHT = 'Tire Pressure Rear Right (bar)'

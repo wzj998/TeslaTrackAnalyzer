@@ -2,20 +2,23 @@ import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 
 from AboutDraw.OverlayBaseTool import *
+from AboutDraw.OverlayVehicleState import draw_vehicle_state
 from Structures.ContinusLapsConsts import *
 
 
 def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power_level_max: int,
-                         img_width: int, img_height: int, font: ImageFont, g: float, max_accel_length: float):
+                         img_width: int, img_height: int,
+                         font_normal: ImageFont, font_small: ImageFont,
+                         g: float, max_accel_length: float):
     draw = ImageDraw.Draw(img)
 
     x_ratio = img_width / 1280
     y_ratio = img_height / 960
 
-    draw_left_top(draw, font, row, x_ratio, y_ratio)
-    draw_left_bottom(draw, font, row, x_ratio, y_ratio)
-    draw_right_bottom(draw, font, power_level_max, power_level_min, row, x_ratio, y_ratio)
-    draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio)
+    draw_left_top(draw, font_normal, row, x_ratio, y_ratio)
+    draw_left_bottom(draw, font_small, row, 140, 740, x_ratio, y_ratio)
+    draw_right_bottom(draw, font_normal, power_level_max, power_level_min, row, x_ratio, y_ratio)
+    draw_center_bottom(draw, font_normal, g, max_accel_length, row, x_ratio, y_ratio)
 
 
 def draw_left_top(draw, font, row, x_ratio, y_ratio):
@@ -28,10 +31,12 @@ def draw_left_top(draw, font, row, x_ratio, y_ratio):
     draw_text(draw, str_mmssms_laptime, 20, 44, font, x_ratio, y_ratio)
 
 
-def draw_left_bottom(draw, font, row, x_ratio, y_ratio):
-    # show battery
-    battery = row[COL_NAME_STATE_OF_CHARGE]
-    draw_text(draw, f'{battery:.1f} %', 20, 880, font, x_ratio, y_ratio)
+def draw_left_bottom(draw, font, row,
+                     battery_rect_left, battery_rect_top,
+                     x_ratio, y_ratio, battery_rect_width=124, battery_rect_height=140):
+    draw_vehicle_state(draw, row,
+                       battery_rect_left, battery_rect_top, battery_rect_width, battery_rect_height,
+                       font, x_ratio, y_ratio)
 
 
 def draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio):

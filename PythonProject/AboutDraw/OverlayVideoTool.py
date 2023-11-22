@@ -30,11 +30,17 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     np_back = generate_samecolor_np(width, height, backcolor)
     img_back = Image.fromarray(np_back)
     img_paths = []
+    # delete folder overlay_video_imgs if exist
+    if os.path.exists('../SampleOut/overlay_video_imgs'):
+        for file in os.listdir('../SampleOut/overlay_video_imgs'):
+            os.remove(f'../SampleOut/overlay_video_imgs/{file}')
+        os.rmdir('../SampleOut/overlay_video_imgs')
     # create folder overlay_video_imgs if not exist
     if not os.path.exists('../SampleOut/overlay_video_imgs'):
         os.makedirs('../SampleOut/overlay_video_imgs')
 
-    font = ImageFont.truetype('arial.ttf', 20)
+    font_normal = ImageFont.truetype('arial.ttf', 20)
+    font_small = ImageFont.truetype('arial.ttf', 12)
 
     row_indexes_really_deal = []
     num_frames = int(max_total_ms_really / frame_ms_delta)
@@ -89,7 +95,9 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
                                   args=(i_part, img_back, df, power_level_min, power_level_max,
-                                        row_indexes, font, num_frames, num_processes,
+                                        row_indexes,
+                                        font_normal, font_small,
+                                        num_frames, num_processes,
                                         lock_finished_frames, finished_frames, g, max_accel_length))
         results.append(result)
     pool.close()
@@ -102,7 +110,9 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-def generate_overlay_video_part(_, img_back, df, power_level_min, power_level_max, row_indexes, font,
+# noinspection PyUnusedLocal
+def generate_overlay_video_part(i_part, img_back, df, power_level_min, power_level_max, row_indexes,
+                                font_normal, font_small,
                                 num_frames, num_processes, lock_finished_frames, finished_frames,
                                 g, max_accel_length):
     img_paths = []
@@ -110,13 +120,15 @@ def generate_overlay_video_part(_, img_back, df, power_level_min, power_level_ma
     len_row_indexes = len(row_indexes)
     prgress_last_report = 0
     i_last_report = 0
-    delta_progress_2_report = 0.01 * num_processes
+    delta_progress_2_report = 0.01  # * num_processes
     for i, index in enumerate(row_indexes):
         row = df.iloc[index]
 
         img = img_back.copy()
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
-                                            img_width, img_height, font, g, max_accel_length)
+                                            img_width, img_height,
+                                            font_normal, font_small,
+                                            g, max_accel_length)
         # save img
         img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
         img.save(img_path)
