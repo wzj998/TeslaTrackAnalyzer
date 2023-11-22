@@ -17,7 +17,7 @@ def generate_samecolor_np(width, height, color):
 
 def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
                                      width, height, s_limit=None, altitude=0,
-                                     backcolor=(0, 255, 0), fps=60, lap_start=1) -> list:
+                                     backcolor=(128, 0, 128), fps=60, lap_start=1) -> list:
     frame_ms_delta = 1000 / fps
 
     df = continus_lap.df
