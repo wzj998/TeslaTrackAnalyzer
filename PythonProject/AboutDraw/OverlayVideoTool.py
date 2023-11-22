@@ -28,7 +28,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
         ms_limit = s_limit * 1000
     max_total_ms_really = min(last_total_ms, ms_limit)
     np_back = generate_samecolor_np(width, height, backcolor)
-    img_back = Image.fromarray(np_back)
+
     img_paths = []
     # delete folder overlay_video_imgs if exist
     if os.path.exists('../SampleOut/overlay_video_imgs'):
@@ -94,7 +94,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     finished_frames = manager.Value('i', 0)
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, img_back, df, power_level_min, power_level_max,
+                                  args=(i_part, np_back, df, power_level_min, power_level_max,
                                         row_indexes,
                                         font_normal, font_small,
                                         num_frames, num_processes,
@@ -111,12 +111,12 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 
 
 # noinspection PyUnusedLocal
-def generate_overlay_video_part(i_part, img_back, df, power_level_min, power_level_max, row_indexes,
+def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_level_max, row_indexes,
                                 font_normal, font_small,
                                 num_frames, num_processes, lock_finished_frames, finished_frames,
                                 g, max_accel_length):
     img_paths = []
-    img_width, img_height = img_back.size
+    img_width, img_height = np_back.shape[1], np_back.shape[0]
     len_row_indexes = len(row_indexes)
     prgress_last_report = 0
     i_last_report = 0
@@ -124,15 +124,20 @@ def generate_overlay_video_part(i_part, img_back, df, power_level_min, power_lev
     for i, index in enumerate(row_indexes):
         row = df.iloc[index]
 
-        img = img_back.copy()
+        np_img = np_back.copy()
+        img = Image.fromarray(np_img)
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
                                             img_width, img_height,
                                             font_normal, font_small,
                                             g, max_accel_length)
-        # save img
-        img_path = f'../SampleOut/overlay_video_imgs/{index}.png'
-        img.save(img_path)
-        img_paths.append(img_path)
+
+        # save img will trigger shell infrastructure
+        # noinspection PyTypeChecker
+        np_arr = np.array(img)
+        img_path = f'../SampleOut/overlay_video_imgs/{index}'
+        # save with compression
+        np.savez_compressed(img_path, arr_0=np_arr)
+        img_paths.append(f'{img_path}.npz')
 
         # print progress of this part
         progress = (i + 1) / len_row_indexes
