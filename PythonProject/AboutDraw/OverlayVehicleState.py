@@ -117,9 +117,9 @@ def draw_around_left_top_wheel(draw, font, row,
                                text_height, text_height_2_line,
                                wheel_rect_left, wheel_rect_top, wheel_rect_height,
                                wheel_rect_width, x_ratio, y_ratio):
-    tire_pressure_offset_x = -82
+    tire_pressure_offset_x = -52
     tire_pressure_offset_y = -6 - text_height
-    tire_slip_offset_x = -82
+    tire_slip_offset_x = tire_pressure_offset_x
     tire_slip_offset_y = 6
 
     brake_temp_offset_x = 8
@@ -127,7 +127,7 @@ def draw_around_left_top_wheel(draw, font, row,
 
     wheel_rect_y_center = wheel_rect_top + wheel_rect_height / 2
     # left top tire pressure
-    draw_text(draw, f'pressure {row[COL_NAME_TIRE_PRESSURE_FRONT_LEFT]:.2f}',
+    draw_text(draw, f'{row[COL_NAME_TIRE_PRESSURE_FRONT_LEFT]:.2f} bar',
               wheel_rect_left + tire_pressure_offset_x, wheel_rect_y_center + tire_pressure_offset_y,
               font, x_ratio, y_ratio)
     # left top tire slip
@@ -146,7 +146,7 @@ def draw_around_right_top_wheel(draw, font, row,
                                 wheel_rect_height, wheel_rect_width, x_ratio, y_ratio):
     tire_pressure_offset_x = 8
     tire_pressure_offset_y = -6 - text_height
-    tire_slip_offset_x = 8
+    tire_slip_offset_x = tire_pressure_offset_x
     tire_slip_offset_y = 6
 
     brake_temp_offset_x = -66
@@ -154,7 +154,7 @@ def draw_around_right_top_wheel(draw, font, row,
 
     wheel_rect_y_center = wheel_rect_top + wheel_rect_height / 2
     # right top tire pressure
-    draw_text(draw, f'pressure {row[COL_NAME_TIRE_PRESSURE_FRONT_RIGHT]:.2f}',
+    draw_text(draw, f'{row[COL_NAME_TIRE_PRESSURE_FRONT_RIGHT]:.2f} bar',
               wheel_rect_left + wheel_rect_width + tire_pressure_offset_x, wheel_rect_y_center + tire_pressure_offset_y,
               font, x_ratio, y_ratio)
     # right top tire slip
@@ -171,9 +171,9 @@ def draw_around_left_bottom_wheel(draw, font, row,
                                   text_height, text_height_2_line,
                                   wheel_rect_left, wheel_rect_top, wheel_rect_height, wheel_rect_width, x_ratio,
                                   y_ratio):
-    tire_pressure_offset_x = -82
+    tire_pressure_offset_x = -52
     tire_pressure_offset_y = -6 - text_height
-    tire_slip_offset_x = -82
+    tire_slip_offset_x = tire_pressure_offset_x
     tire_slip_offset_y = 6
 
     brake_temp_offset_x = 8
@@ -181,7 +181,7 @@ def draw_around_left_bottom_wheel(draw, font, row,
 
     wheel_rect_y_center = wheel_rect_top + wheel_rect_height / 2
     # left bottom tire pressure
-    draw_text(draw, f'pressure {row[COL_NAME_TIRE_PRESSURE_REAR_LEFT]:.2f}',
+    draw_text(draw, f'{row[COL_NAME_TIRE_PRESSURE_REAR_LEFT]:.2f} bar',
               wheel_rect_left + tire_pressure_offset_x, wheel_rect_y_center + tire_pressure_offset_y,
               font, x_ratio, y_ratio)
     # left bottom tire slip
@@ -200,7 +200,7 @@ def draw_around_right_bottom_wheel(draw, font, row,
                                    y_ratio):
     tire_pressure_offset_x = 8
     tire_pressure_offset_y = -6 - text_height
-    tire_slip_offset_x = 8
+    tire_slip_offset_x = tire_pressure_offset_x
     tire_slip_offset_y = 6
 
     brake_temp_offset_x = -66
@@ -208,7 +208,7 @@ def draw_around_right_bottom_wheel(draw, font, row,
 
     wheel_rect_y_center = wheel_rect_top + wheel_rect_height / 2
     # right bottom tire pressure
-    draw_text(draw, f'pressure {row[COL_NAME_TIRE_PRESSURE_REAR_RIGHT]:.2f}',
+    draw_text(draw, f'{row[COL_NAME_TIRE_PRESSURE_REAR_RIGHT]:.2f} bar',
               wheel_rect_left + wheel_rect_width + tire_pressure_offset_x, wheel_rect_y_center + tire_pressure_offset_y,
               font, x_ratio, y_ratio)
     # right bottom tire slip
