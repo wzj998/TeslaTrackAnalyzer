@@ -25,9 +25,9 @@ def main():
         writer.append_data(np_array)
 
         if i_img_path % 60 == 0:
-            print(f'\rsave overlay video: {i_img_path / len(img_paths) * 100:.0f}%', end='')
+            print(f'\rsave overlay video: {i_img_path / len(img_paths) * 100:.1f}%', end='')
     writer.close()
-    print(f'\rsave overlay video: 100%')
+    print(f'\rsave overlay video: 100.0%')
 
 
 if __name__ == "__main__":

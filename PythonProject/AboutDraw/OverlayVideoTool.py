@@ -50,7 +50,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     index_last = df.index[-1]
     for i_frame in range(num_frames):
         if i_frame % 60 == 0:
-            print(f'\rgenerate_overlay_video find index: {i_frame / num_frames * 100:.0f}%', end='')
+            print(f'\rgenerate_overlay_video find index: {i_frame / num_frames * 100:.1f}%', end='')
         b_found_this_frame = False
         total_ms = i_frame * frame_ms_delta
         while index_now <= index_last:
@@ -62,7 +62,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
             index_now += 1
         if not b_found_this_frame:
             break
-    print(f'\rgenerate_overlay_video find index: 100%')
+    print(f'\rgenerate_overlay_video find index: 100.0%')
 
     num_processes = os.cpu_count()
     # split row_indexes_really_deal to num_cpu parts
@@ -108,7 +108,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     # get img_paths
     for result in results:
         img_paths.extend(result.get())
-    print_really_draw_progress(time.time() - time_start_really_draw, num_frames, num_frames)
+    print_really_draw_progress(time.time() - time_start_really_draw, num_frames, num_frames, end_str='\n')
 
     return img_paths
 
@@ -120,6 +120,7 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
                                 g, max_accel_length):
     img_paths = []
     img_width, img_height = np_back.shape[1], np_back.shape[0]
+    img_back = Image.fromarray(np_back)
     len_row_indexes = len(row_indexes)
     prgress_last_report = 0
     i_last_report = 0
@@ -127,8 +128,7 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
     for i, index in enumerate(row_indexes):
         row = df.iloc[index]
 
-        np_img = np_back.copy()
-        img = Image.fromarray(np_img)
+        img = img_back.copy()
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
                                             img_width, img_height,
                                             font_normal, font_small,
@@ -154,13 +154,13 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
     return img_paths
 
 
-def print_really_draw_progress(elapsed_time, finished_frames_value, num_frames):
+def print_really_draw_progress(elapsed_time, finished_frames_value, num_frames, end_str=''):
     if finished_frames_value > 0:
-        remaining_time_str = f'remaining time: {elapsed_time / finished_frames_value * (num_frames - finished_frames_value):.0f}s'
+        remaining_time_str = f'remaining time: {elapsed_time / finished_frames_value * (num_frames - finished_frames_value):.1f}s'
     else:
         remaining_time_str = ''
     print(f'\rgenerate_overlay_video really draw: '
-          f'{finished_frames_value / num_frames * 100:.0f}% '
-          f'elapsed time: {elapsed_time:.0f}s '
+          f'{finished_frames_value / num_frames * 100:.1f}% '
+          f'elapsed time: {elapsed_time:.1f}s '
           f'{remaining_time_str}',
-          end='')
+          end=end_str)
