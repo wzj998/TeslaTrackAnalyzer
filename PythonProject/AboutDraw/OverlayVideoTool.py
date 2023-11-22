@@ -138,9 +138,12 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
         # noinspection PyTypeChecker
         np_arr = np.array(img)
         img_path = f'../SampleOut/overlay_video_imgs/{index}'
+        img_path_with_npz = f'{img_path}.npz'
         # save with compression
+        if os.path.exists(img_path_with_npz):
+            os.remove(img_path_with_npz)
         np.savez_compressed(img_path, arr_0=np_arr)
-        img_paths.append(f'{img_path}.npz')
+        img_paths.append(img_path_with_npz)
 
         # print progress of this part
         progress = (i + 1) / len_row_indexes
