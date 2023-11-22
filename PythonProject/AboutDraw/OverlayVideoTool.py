@@ -17,17 +17,27 @@ def generate_samecolor_np(width, height, color):
 
 
 def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
-                                     width, height, s_limit=None, altitude=0,
-                                     backcolor=(128, 0, 128), fps=60, lap_start=1) -> list:
+                                     width, height,
+                                     min_total_s=None, max_total_s=None,
+                                     backcolor=(128, 0, 128), fps=60) -> list:
     frame_ms_delta = 1000 / fps
+    lap_valid_start = 1
 
     df = continus_lap.df
+    if min_total_s is None:
+        min_total_s = 0
+    min_total_ms_really = min_total_s * 1000
+
     last_total_ms = df.iloc[-1][COL_NAME_TOTAL_MS]
-    if s_limit is None:
-        ms_limit = last_total_ms
+    if max_total_s is None:
+        max_total_ms = last_total_ms
     else:
-        ms_limit = s_limit * 1000
-    max_total_ms_really = min(last_total_ms, ms_limit)
+        max_total_ms = max_total_s * 1000
+    max_total_ms_really = min(last_total_ms, max_total_ms)
+
+    if max_total_ms_really <= min_total_ms_really:
+        raise ValueError(f'max_total_ms_really <= min_total_ms_really: {max_total_ms_really} <= {min_total_ms_really}')
+
     np_back = generate_samecolor_np(width, height, backcolor)
 
     img_paths = []
@@ -44,15 +54,15 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     font_small = ImageFont.truetype('arial.ttf', 12)
 
     row_indexes_really_deal = []
-    num_frames = int(max_total_ms_really / frame_ms_delta)
-    index_start = df[df[COL_NAME_LAP] >= lap_start].index[0]
+    num_frames = int((max_total_ms_really - min_total_ms_really) / frame_ms_delta)
+    index_start = df[df[COL_NAME_LAP] >= lap_valid_start].index[0]
     index_now = index_start
     index_last = df.index[-1]
     for i_frame in range(num_frames):
         if i_frame % 60 == 0:
             print(f'\rgenerate_overlay_video find index: {i_frame / num_frames * 100:.1f}%', end='')
         b_found_this_frame = False
-        total_ms = i_frame * frame_ms_delta
+        total_ms = i_frame * frame_ms_delta + min_total_ms_really
         while index_now <= index_last:
             row = df.iloc[index_now]
             if row[COL_NAME_TOTAL_MS] >= total_ms:
@@ -70,7 +80,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     power_level_min = df[COL_NAME_POWER_LEVEL].min()
     power_level_max = df[COL_NAME_POWER_LEVEL].max()
 
-    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(altitude,
+    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(continus_lap.altitude,
                                                                                         continus_lap.latitude_start)
     # 先根据万有引力计算g
     m_earth = 5.9722 * 10 ** 24
@@ -140,9 +150,15 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
         img_path = f'../SampleOut/overlay_video_imgs/{index}'
         img_path_with_npz = f'{img_path}.npz'
         # save with compression
-        if os.path.exists(img_path_with_npz):
-            os.remove(img_path_with_npz)
-        np.savez_compressed(img_path, arr_0=np_arr)
+        retry_times = 0
+        while not os.path.exists(img_path_with_npz):
+            try:
+                np.savez_compressed(img_path, arr_0=np_arr)
+            except PermissionError:
+                retry_times += 1
+                if retry_times > 10:
+                    raise PermissionError(
+                        f'generate_overlay_video_part: {img_path_with_npz} PermissionError retry_times > 10')
         img_paths.append(img_path_with_npz)
 
         # print progress of this part

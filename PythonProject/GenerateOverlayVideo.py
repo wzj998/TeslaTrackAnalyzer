@@ -10,11 +10,10 @@ def main():
     csv_path = '../SampleData/telemetry-v1-2023-10-28-16_25_58.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
-    continus_lap = ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 100)
+    continus_lap = ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 29)
     # generate overlay video, background is green
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lap, 1280, 960,
-                                                                  10,
-                                                                  29)
+                                                                  740, 750)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60)
     for i_img_path in range(len(img_paths)):
