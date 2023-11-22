@@ -115,7 +115,7 @@ def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x,
     # draw inner g sphere, max_accel_length对应radius
     # 不会因为画面长宽变化，圆就不是圆了
     # lat_accel是横向加速度，对应x轴，long_accel是纵向加速度，对应y轴
-    x_offset = -lat_accel / max_accel_length * radius
+    x_offset = lat_accel / max_accel_length * radius
     y_offset = long_accel / max_accel_length * radius
     x_sphere = center_x * x_ratio + x_offset
     y_sphere = center_y * y_ratio + y_offset

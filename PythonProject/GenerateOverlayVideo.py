@@ -12,7 +12,7 @@ def main():
     continus_lap = ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 100)
     # generate overlay video, background is green
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lap, 1280, 960,
-                                                                  100,
+                                                                  10,
                                                                   29)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60)
