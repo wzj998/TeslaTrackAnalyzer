@@ -56,7 +56,8 @@ def draw_right_bottom(draw, font, power_level_max, power_level_min, row, x_ratio
     power_level = row[COL_NAME_POWER_LEVEL]
     draw_zf_bar(draw, power_level, power_level_min, power_level_max,
                 1170, 860, (0, 255, 0), x_ratio, y_ratio)
-    draw_text(draw, f'{power_level:.1f} kw', 1170 - 15, 860 + 20, font, x_ratio, y_ratio)
+    draw_text(draw, f'{power_level:.1f} kw', 1170, 860 + 25, font, x_ratio, y_ratio,
+              70 * size_ratio, 1)
     top_progress_rect = 760
     # draw throttle rect
     draw_progress_rect(draw, row[COL_NAME_THROTTLE] / 100, 1240, top_progress_rect, (0, 255, 0), x_ratio, y_ratio)
