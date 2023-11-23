@@ -50,8 +50,14 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     if not os.path.exists('../SampleOut/overlay_video_imgs'):
         os.makedirs('../SampleOut/overlay_video_imgs')
 
-    font_normal = ImageFont.truetype('arial.ttf', 20)
-    font_small = ImageFont.truetype('arial.ttf', 12)
+    x_ratio = width / 1280
+    y_ratio = height / 960
+    if x_ratio > y_ratio:
+        size_ratio = y_ratio
+    else:
+        size_ratio = x_ratio
+    font_normal = ImageFont.truetype('arial.ttf', 20 * size_ratio)
+    font_small = ImageFont.truetype('arial.ttf', 12 * size_ratio)
 
     row_indexes_really_deal = []
     num_frames = int((max_total_ms_really - min_total_ms_really) / frame_ms_delta)
@@ -108,7 +114,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
         result = pool.apply_async(generate_overlay_video_part,
                                   args=(i_part, np_back, df, power_level_min, power_level_max,
                                         row_indexes,
-                                        font_normal, font_small,
+                                        font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                         num_frames, num_processes,
                                         lock_finished_frames, finished_frames, time_start_really_draw,
                                         g, max_accel_length))
@@ -125,11 +131,10 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 
 # noinspection PyUnusedLocal
 def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_level_max, row_indexes,
-                                font_normal, font_small,
+                                font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                 num_frames, num_processes, lock_finished_frames, finished_frames, time_start,
                                 g, max_accel_length):
     img_paths = []
-    img_width, img_height = np_back.shape[1], np_back.shape[0]
     img_back = Image.fromarray(np_back)
     len_row_indexes = len(row_indexes)
     prgress_last_report = 0
@@ -140,7 +145,7 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
 
         img = img_back.copy()
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
-                                            img_width, img_height,
+                                            x_ratio, y_ratio, size_ratio,
                                             font_normal, font_small,
                                             g, max_accel_length)
 
