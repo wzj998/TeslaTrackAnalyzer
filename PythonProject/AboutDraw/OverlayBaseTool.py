@@ -1,25 +1,37 @@
 import math
 
 
+class AnchorHorizontal:
+    LEFT = 0
+    CENTER = 1
+    RIGHT = 2
+
+
+class AnchorVertical:
+    TOP = 0
+    CENTER = 1
+    BOTTOM = 2
+
+
 def draw_text(draw, text, x, y, font, x_ratio, y_ratio,
-              estimiate_width=None, anchor_left_center_right=0,
-              estimiate_height=None, anchor_top_center_bottom=0,
+              estimiate_width=None, anchor_left_center_right: AnchorHorizontal = AnchorHorizontal.LEFT,
+              estimiate_height=None, anchor_top_center_bottom: AnchorVertical = AnchorVertical.TOP,
               text_color=(255, 255, 255)):
     x_really = x * x_ratio
-    if anchor_left_center_right == 1:
+    if anchor_left_center_right == AnchorHorizontal.CENTER:
         if estimiate_width is None:
             raise ValueError('estimiate_width is None')
         x_really -= estimiate_width / 2
-    elif anchor_left_center_right == 2:
+    elif anchor_left_center_right == AnchorHorizontal.RIGHT:
         if estimiate_width is None:
             raise ValueError('estimiate_width is None')
         x_really -= estimiate_width
     y_really = y * y_ratio
-    if anchor_top_center_bottom == 1:
+    if anchor_top_center_bottom == AnchorVertical.CENTER:
         if estimiate_height is None:
             raise ValueError('estimiate_height is None')
         y_really -= estimiate_height / 2
-    elif anchor_top_center_bottom == 2:
+    elif anchor_top_center_bottom == AnchorVertical.BOTTOM:
         if estimiate_height is None:
             raise ValueError('estimiate_height is None')
         y_really -= estimiate_height
