@@ -15,7 +15,7 @@ def main():
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lap, 1280, 960,
                                                                   740, 750)
     # save overlay video using ImageIO
-    writer = imageio.get_writer(out_video_path, fps=60)
+    writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)
     for i_img_path in range(len(img_paths)):
         path_now = img_paths[i_img_path]
 
