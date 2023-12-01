@@ -13,28 +13,36 @@ class AnchorVertical:
     BOTTOM = 2
 
 
-def draw_text(draw, text, x, y, font, x_ratio, y_ratio,
-              estimiate_width=None, anchor_left_center_right: AnchorHorizontal = AnchorHorizontal.LEFT,
-              estimiate_height=None, anchor_top_center_bottom: AnchorVertical = AnchorVertical.TOP,
+def draw_text(draw, text, x, y, font, x_ratio, y_ratio, size_ratio=None,
+              estimate_width=None, anchor_left_center_right: AnchorHorizontal = AnchorHorizontal.LEFT,
+              estimate_height=None, anchor_top_center_bottom: AnchorVertical = AnchorVertical.TOP,
               text_color=(255, 255, 255)):
     x_really = x * x_ratio
     if anchor_left_center_right == AnchorHorizontal.CENTER:
-        if estimiate_width is None:
-            raise ValueError('estimiate_width is None')
-        x_really -= estimiate_width / 2
+        if estimate_width is None:
+            raise ValueError('estimate_width is None')
+        if size_ratio is None:
+            raise ValueError('size_ratio is None')
+        x_really -= estimate_width / 2 * size_ratio
     elif anchor_left_center_right == AnchorHorizontal.RIGHT:
-        if estimiate_width is None:
-            raise ValueError('estimiate_width is None')
-        x_really -= estimiate_width
+        if estimate_width is None:
+            raise ValueError('estimate_width is None')
+        if size_ratio is None:
+            raise ValueError('size_ratio is None')
+        x_really -= estimate_width * size_ratio
     y_really = y * y_ratio
     if anchor_top_center_bottom == AnchorVertical.CENTER:
-        if estimiate_height is None:
-            raise ValueError('estimiate_height is None')
-        y_really -= estimiate_height / 2
+        if estimate_height is None:
+            raise ValueError('estimate_height is None')
+        if size_ratio is None:
+            raise ValueError('size_ratio is None')
+        y_really -= estimate_height / 2 * size_ratio
     elif anchor_top_center_bottom == AnchorVertical.BOTTOM:
-        if estimiate_height is None:
-            raise ValueError('estimiate_height is None')
-        y_really -= estimiate_height
+        if estimate_height is None:
+            raise ValueError('estimate_height is None')
+        if size_ratio is None:
+            raise ValueError('size_ratio is None')
+        y_really -= estimate_height * size_ratio
     draw.text((x_really,
                y_really),
               text, font=font, fill=text_color, stroke_width=2, stroke_fill=(0, 0, 0))
