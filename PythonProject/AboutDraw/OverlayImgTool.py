@@ -43,13 +43,30 @@ def draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio, s
     draw_g_force_circle(draw, row[COL_NAME_LONG_ACCEL], row[COL_NAME_LAT_ACCEL], max_accel_length, 1280 / 2, 840,
                         x_ratio, y_ratio, size_ratio, g_force_big_radius)
     accel_length = math.sqrt(row[COL_NAME_LONG_ACCEL] ** 2 + row[COL_NAME_LAT_ACCEL] ** 2)
-    draw_text(draw, f'{accel_length / g:.2f} g', 1280 / 2, 840 - g_force_big_radius - 12, font, x_ratio, y_ratio,
+    # g-force length
+    draw_text(draw, f'total: {accel_length / g:.2f} g', 1280 / 2,
+              840 - (g_force_big_radius + 14) / y_ratio * size_ratio, font, x_ratio, y_ratio,
               size_ratio,
-              50, AnchorHorizontal.CENTER,
+              90, AnchorHorizontal.CENTER,
               20, AnchorVertical.BOTTOM)
+    # x g-force
+    draw_text(draw, f'x: {row[COL_NAME_LAT_ACCEL] / g:.2f} g',
+              1280 / 2 + (g_force_big_radius + 20) / x_ratio * size_ratio, 840, font,
+              x_ratio, y_ratio,
+              size_ratio,
+              None, AnchorHorizontal.LEFT,
+              20, AnchorVertical.CENTER)
+    # y g-force
+    draw_text(draw, f'y: {row[COL_NAME_LONG_ACCEL] / g:.2f} g', 1280 / 2,
+              840 + (g_force_big_radius + 14) / y_ratio * size_ratio, font,
+              x_ratio, y_ratio,
+              size_ratio,
+              50, AnchorHorizontal.CENTER)
     # show speed
     speed = row[COL_NAME_SPEED_KMH]
-    draw_text(draw, f'{speed:.0f} km/h', 1280 / 2, 840 + g_force_big_radius + 12, font, x_ratio, y_ratio,
+    draw_text(draw, f'{speed:.0f} km/h', 1280 / 2, 840 + (g_force_big_radius + 14 + 20 + 10) / y_ratio * size_ratio,
+              font,
+              x_ratio, y_ratio,
               size_ratio,
               50, AnchorHorizontal.CENTER)
 

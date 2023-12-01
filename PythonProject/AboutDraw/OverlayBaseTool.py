@@ -147,6 +147,20 @@ def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio,
 
 def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio,
                         radius, sphere_radius=7):
+    # draw cross
+    # 不会因为画面长宽变化，圆就不是圆了
+    length_cross = radius * size_ratio * 1.2
+    draw.line((center_x * x_ratio - length_cross,
+               center_y * y_ratio,
+               center_x * x_ratio + length_cross,
+               center_y * y_ratio),
+              fill=(255, 255, 255), width=1)
+    draw.line((center_x * x_ratio,
+               center_y * y_ratio - length_cross,
+               center_x * x_ratio,
+               center_y * y_ratio + length_cross),
+              fill=(255, 255, 255), width=1)
+
     # draw circle
     # 不会因为画面长宽变化，圆就不是圆了
     draw.ellipse((center_x * x_ratio - radius * size_ratio,
