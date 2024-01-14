@@ -154,12 +154,12 @@ def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x,
                center_y * y_ratio,
                center_x * x_ratio + length_cross,
                center_y * y_ratio),
-              fill=(255, 255, 255), width=1)
+              fill=(255, 255, 255), width=3)
     draw.line((center_x * x_ratio,
                center_y * y_ratio - length_cross,
                center_x * x_ratio,
                center_y * y_ratio + length_cross),
-              fill=(255, 255, 255), width=1)
+              fill=(255, 255, 255), width=3)
 
     # draw circle
     # 不会因为画面长宽变化，圆就不是圆了

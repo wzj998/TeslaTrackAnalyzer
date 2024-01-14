@@ -5,7 +5,7 @@ import time
 from multiprocessing import Pool
 
 import numpy as np
-from PIL import Image, ImageFont
+from PIL import Image, ImageFont, ImageDraw
 
 from AboutDraw import OverlayImgTool
 from Structures import ContinusLaps
@@ -16,14 +16,14 @@ def generate_samecolor_np(width, height, color):
     return np.full((height, width, 3), color, dtype=np.uint8)
 
 
-def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
+def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
                                      width, height,
                                      min_total_s=None, max_total_s=None,
                                      backcolor=(128, 0, 128), fps=60) -> list:
     frame_ms_delta = 1000 / fps
     lap_valid_start = 1
 
-    df = continus_lap.df
+    df = continus_laps.df
     if min_total_s is None:
         min_total_s = 0
     min_total_ms_really = min_total_s * 1000
@@ -37,6 +37,10 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 
     if max_total_ms_really <= min_total_ms_really:
         raise ValueError(f'max_total_ms_really <= min_total_ms_really: {max_total_ms_really} <= {min_total_ms_really}')
+
+    # for draw gps track
+    ContinusLaps.add_x_m_y_m_col(df, continus_laps.longtitude_start, continus_laps.latitude_start,
+                                 continus_laps.altitude)
 
     np_back = generate_samecolor_np(width, height, backcolor)
 
@@ -86,8 +90,8 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     power_level_min = df[COL_NAME_POWER_LEVEL].min()
     power_level_max = df[COL_NAME_POWER_LEVEL].max()
 
-    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(continus_lap.altitude,
-                                                                                        continus_lap.latitude_start)
+    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(continus_laps.altitude,
+                                                                                        continus_laps.latitude_start)
     # 先根据万有引力计算g
     m_earth = 5.9722 * 10 ** 24
     g = 6.67408 * 10 ** -11 * m_earth / (earth_radius_2_use ** 2)
@@ -112,7 +116,7 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
     time_start_really_draw = time.time()
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, np_back, df, power_level_min, power_level_max,
+                                  args=(i_part, np_back, continus_laps, power_level_min, power_level_max,
                                         row_indexes,
                                         font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                         num_frames, num_processes,
@@ -130,14 +134,18 @@ def generate_overlay_video_img_paths(continus_lap: ContinusLaps.ContinusLaps,
 
 
 # noinspection PyUnusedLocal
-def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_level_max, row_indexes,
+def generate_overlay_video_part(i_part, np_back, continus_laps, power_level_min, power_level_max, row_indexes,
                                 font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                 num_frames, num_processes, lock_finished_frames, finished_frames, time_start,
                                 g, max_accel_length):
     img_paths = []
+
     img_back = Image.fromarray(np_back)
+
+    df, x_min, x_max, y_min, y_max = draw_gps_track_on_img_back(continus_laps, img_back, size_ratio, x_ratio, y_ratio)
+
     len_row_indexes = len(row_indexes)
-    prgress_last_report = 0
+    progress_last_report = 0
     i_last_report = 0
     delta_progress_2_report = 0.01  # * num_processes
     for i, index in enumerate(row_indexes):
@@ -147,7 +155,8 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
         OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
                                             x_ratio, y_ratio, size_ratio,
                                             font_normal, font_small,
-                                            g, max_accel_length)
+                                            g, max_accel_length,
+                                            x_min, x_max, y_min, y_max)
 
         # save img will trigger shell infrastructure
         # noinspection PyTypeChecker
@@ -168,14 +177,44 @@ def generate_overlay_video_part(i_part, np_back, df, power_level_min, power_leve
 
         # print progress of this part
         progress = (i + 1) / len_row_indexes
-        if progress - prgress_last_report >= delta_progress_2_report:
+        if progress - progress_last_report >= delta_progress_2_report:
             with lock_finished_frames:
                 finished_frames.value += i - i_last_report
                 elapsed_time = time.time() - time_start
                 print_really_draw_progress(elapsed_time, finished_frames.value, num_frames)
-            prgress_last_report = progress
+            progress_last_report = progress
             i_last_report = i
     return img_paths
+
+
+def draw_gps_track_on_img_back(continus_laps, img_back, size_ratio, x_ratio, y_ratio):
+    # draw gps track on img_back
+    lap_index_fastest = None
+    if len(continus_laps.validlap_times_dict_sorted) > 0:
+        lap_index_fastest = list(continus_laps.validlap_times_dict_sorted.keys())[0]
+    df = continus_laps.df
+    x_min = df[COL_NAME_X_M].min()
+    x_max = df[COL_NAME_X_M].max()
+    y_min = df[COL_NAME_Y_M].min()
+    y_max = df[COL_NAME_Y_M].max()
+    x_2_draw_last = None
+    y_2_draw_last = None
+    draw_gps_track = ImageDraw.Draw(img_back)
+    if lap_index_fastest is not None:
+        df_really_draw_gps_track = df[df[COL_NAME_LAP] == lap_index_fastest]
+    else:
+        # draw all laps
+        df_really_draw_gps_track = df
+    for _, row in df_really_draw_gps_track.iterrows():
+        # draw gps track
+        circle_radius, x_m_draw, y_m_draw = OverlayImgTool.get_gps_x_y_2_draw(row, size_ratio, x_ratio, y_ratio,
+                                                                              x_min, x_max, y_min, y_max)
+        # draw line to img_back
+        if x_2_draw_last is not None and y_2_draw_last is not None:
+            draw_gps_track.line((x_2_draw_last, y_2_draw_last, x_m_draw, y_m_draw), fill=(255, 255, 255), width=2)
+        x_2_draw_last = x_m_draw
+        y_2_draw_last = y_m_draw
+    return df, x_min, x_max, y_min, y_max
 
 
 def print_really_draw_progress(elapsed_time, finished_frames_value, num_frames, end_str=''):

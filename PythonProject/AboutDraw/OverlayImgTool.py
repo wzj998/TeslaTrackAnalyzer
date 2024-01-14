@@ -9,10 +9,12 @@ from Structures.ContinusLapsConsts import *
 def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power_level_max: int,
                          x_ratio: float, y_ratio: float, size_ratio: float,
                          font_normal: ImageFont, font_small: ImageFont,
-                         g: float, max_accel_length: float):
+                         g: float, max_accel_length: float,
+                         x_min: float, x_max: float, y_min: float, y_max: float):
     draw = ImageDraw.Draw(img)
 
     draw_left_top(draw, font_normal, row, x_ratio, y_ratio, size_ratio)
+    draw_right_top(draw, row, x_ratio, y_ratio, size_ratio, x_min, x_max, y_min, y_max)
     draw_left_bottom(draw, font_small, row, 140, 740, x_ratio, y_ratio, size_ratio)
     draw_right_bottom(draw, font_normal, power_level_max, power_level_min, row, x_ratio, y_ratio, size_ratio)
     draw_center_bottom(draw, font_normal, g, max_accel_length, row, x_ratio, y_ratio, size_ratio)
@@ -26,6 +28,47 @@ def draw_left_top(draw, font, row, x_ratio, y_ratio, _):
     lap_datetime = row[COL_NAME_LAP_DATETIME]
     str_mmssms_laptime = f'{lap_datetime.minute}:{lap_datetime.second:02}.{lap_datetime.microsecond // 1000:03}'
     draw_text(draw, str_mmssms_laptime, 20 + 20, 14 + 30 + 20 + 100, font, x_ratio, y_ratio)
+
+
+def draw_right_top(draw, row, x_ratio, y_ratio, size_ratio, x_min, x_max, y_min, y_max):
+    if x_max <= x_min:
+        raise ValueError(f'x_max <= x_min: {x_max} <= {x_min}')
+    if y_max <= y_min:
+        raise ValueError(f'y_max <= y_min: {y_max} <= {y_min}')
+
+    # draw red circle by gps pos
+    circle_radius, x_m_draw, y_m_draw = get_gps_x_y_2_draw(row, x_ratio, y_ratio, size_ratio, x_min, x_max, y_min,
+                                                           y_max)
+
+    draw.ellipse((x_m_draw - circle_radius, y_m_draw - circle_radius,
+                  x_m_draw + circle_radius, y_m_draw + circle_radius),
+                 fill=(255, 0, 0))
+
+
+def get_gps_x_y_2_draw(row, x_ratio, y_ratio, size_ratio, x_min, x_max, y_min, y_max):
+    x_m = row[COL_NAME_X_M]
+    y_m = row[COL_NAME_Y_M]
+    width_m = x_max - x_min
+    height_m = y_max - y_min
+    if width_m <= 0:
+        raise ValueError(f'width_m <= 0: {width_m} <= 0')
+    if height_m <= 0:
+        raise ValueError(f'height_m <= 0: {height_m} <= 0')
+    if width_m > height_m:
+        graph_width = 250 * x_ratio
+        graph_height = graph_width * height_m / width_m
+    else:
+        graph_height = 250 * y_ratio
+        graph_width = graph_height * width_m / height_m
+    circle_radius = 5 * size_ratio
+    x_origin = 1280 * x_ratio - graph_width - 20 * x_ratio
+    y_origin = 20 * y_ratio
+
+    x_ratio = (x_m - x_min) / width_m
+    y_ratio = (y_m - y_min) / height_m
+    x_m_draw = x_ratio * graph_width + x_origin
+    y_m_draw = graph_height - y_ratio * graph_height + y_origin
+    return circle_radius, x_m_draw, y_m_draw
 
 
 def draw_left_bottom(draw, font, row,

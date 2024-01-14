@@ -68,7 +68,7 @@ def add_x_m_y_m_col(df, longtitude_origin, latitude_origin_in, altitude):
                             COL_NAME_LONGITUDE] - longtitude_origin) * math.pi / 180 * earth_radius_2_use * \
                        math.cos(latitude_origin_rad)
     df[COL_NAME_Y_M] = (df[
-                            COL_NAME_LATITUDE] - latitude_origin_rad) * math.pi / 180 * earth_radius_2_use
+                            COL_NAME_LATITUDE] - latitude_origin_in) * math.pi / 180 * earth_radius_2_use
 
 
 def calculate_earth_radius_2_use(altitude, latitude_origin_in):
