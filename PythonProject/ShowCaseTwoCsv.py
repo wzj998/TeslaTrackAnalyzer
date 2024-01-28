@@ -7,8 +7,8 @@ from Structures.ContinusLapsConsts import *
 
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2023-10-28-16_25_58.csv',
-                 '../SampleData/telemetry-v1-2023-10-28-16_48_56.csv']
+    csv_paths = ['../SampleData/telemetry-v1-2024-01-28-13_15_43.csv',
+                 '../SampleData/telemetry-v1-2024-01-28-14_44_07.csv']
     continus_lapss = [ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 29) for csv_path in csv_paths]
     for i_continus_laps, continus_laps in enumerate(continus_lapss):
         print('---continus_laps', i_continus_laps, '---')

@@ -233,17 +233,27 @@ def get_dict_checkpoints_reached_by_index_same_timing_line(df_checkpoints_lap, d
 
 def draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
                                 laps, b_laps_2_draw_timing_line_same, cols):
-    # print('---draw_ax_lap_checkpoint_dist---')
+    x_col_name_2_use, x_max, x_min = process_laps_for_x_dist(b_laps_2_draw_timing_line_same, df_checkpoints_lap, laps)
+
+    for i_lap in range(len(laps)):
+        lap = laps[i_lap]
+        df_lap = lap.df_lap
+        str_label = get_str_label_start(lap.lap_index, lap.continus_laps_index)
+        for i in range(len(cols)):
+            axs[i].plot(df_lap[x_col_name_2_use], df_lap[cols[i]], label=str_label + ' ' + cols[i])
+
+        x_max, x_min = update_x_min_y_min(df_lap, x_col_name_2_use, x_max, x_min)
+
+    for ax in axs:
+        ax.set_xlim(left=x_min, right=x_max)
+        ax.legend()
+
+
+def process_laps_for_x_dist(b_laps_2_draw_timing_line_same, df_checkpoints_lap, laps):
     x_col_name_2_use = COL_NAME_DIST_CHECKPOINT_FROM_START
     x_min = None
     x_max = None
     dist_from_start_by_checkpoint_index = generate_dist_from_start_by_checkpoint_index(df_checkpoints_lap)
-
-    # for i_lap in range(len(laps)):
-    #     rst = __process_lap(i_lap, laps[i_lap], df_checkpoints_lap,
-    #                         dist_from_start_by_checkpoint_index,
-    #                         b_laps_2_draw_timing_line_same[i_lap])
-    #     laps[i_lap].df_lap = rst[1]
 
     # use multiprocess to speed up
     num_process = min(multiprocessing.cpu_count(), len(laps))
@@ -264,20 +274,15 @@ def draw_ax_lap_checkpoint_dist(axs, df_checkpoints_lap,
         i_lap, df_lap_new = result.get()
         laps[i_lap].df_lap = df_lap_new
 
+    # # not use multiprocess
+    # for i_lap in range(len(laps)):
+    #     i_lap, df_lap_new = __process_lap(i_lap, laps[i_lap], df_checkpoints_lap,
+    #                                       dist_from_start_by_checkpoint_index,
+    #                                       b_laps_2_draw_timing_line_same[i_lap])
+    #     laps[i_lap].df_lap = df_lap_new
+
     print("All laps processed.")
-
-    for i_lap in range(len(laps)):
-        lap = laps[i_lap]
-        df_lap = lap.df_lap
-        str_label = get_str_label_start(lap.lap_index, lap.continus_laps_index)
-        for i in range(len(cols)):
-            axs[i].plot(df_lap[x_col_name_2_use], df_lap[cols[i]], label=str_label + ' ' + cols[i])
-
-        x_max, x_min = update_x_min_y_min(df_lap, x_col_name_2_use, x_max, x_min)
-
-    for ax in axs:
-        ax.set_xlim(left=x_min, right=x_max)
-        ax.legend()
+    return x_col_name_2_use, x_max, x_min
 
 
 def __process_lap(i_lap, lap, df_checkpoints_lap, dist_from_start_by_checkpoint_index, b_same_timing_line):

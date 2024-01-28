@@ -1,14 +1,16 @@
+import datetime
 import math
 import multiprocessing
 import os
 import time
 from multiprocessing import Pool
+from typing import List
 
 import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 
 from AboutDraw import OverlayImgTool
-from Structures import ContinusLaps
+from Structures import ContinusLaps, Lap
 from Structures.ContinusLapsConsts import *
 
 
@@ -17,8 +19,10 @@ def generate_samecolor_np(width, height, color):
 
 
 def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
+                                     continues_laps_index: int,
                                      width, height,
                                      min_total_s=None, max_total_s=None,
+                                     laps_2_compare_for_time_delta=None,
                                      backcolor=(128, 0, 128), fps=60) -> list:
     frame_ms_delta = 1000 / fps
     lap_valid_start = 1
@@ -116,12 +120,13 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     time_start_really_draw = time.time()
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, np_back, continus_laps, power_level_min, power_level_max,
+                                  args=(i_part, np_back, continus_laps, continues_laps_index,
+                                        power_level_min, power_level_max,
                                         row_indexes,
                                         font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                         num_frames, num_processes,
                                         lock_finished_frames, finished_frames, time_start_really_draw,
-                                        g, max_accel_length))
+                                        g, max_accel_length, laps_2_compare_for_time_delta))
         results.append(result)
     pool.close()
     pool.join()
@@ -133,11 +138,28 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-# noinspection PyUnusedLocal
-def generate_overlay_video_part(i_part, np_back, continus_laps, power_level_min, power_level_max, row_indexes,
+def get_time_delta(continues_laps_index, row, laps_compare_for_time_delta: List[Lap.Lap]) -> float:
+    ans = None
+    for lap in laps_compare_for_time_delta:
+        if lap.continus_laps_index == continues_laps_index and lap.lap_index == row[COL_NAME_LAP]:
+            total_ms_should_be = row[COL_NAME_TOTAL_MS]
+            # find first row_in_lap with COL_NAME_TOTAL_MS >= total_ms_should_be
+            row_in_lap = lap.df_lap[lap.df_lap[COL_NAME_TOTAL_MS] >= total_ms_should_be].iloc[0]
+            # if we find row_in_lap
+            if not row_in_lap.empty:
+                ans = row_in_lap[COL_NAME_TIME_DELTA]
+            break
+    return ans
+
+
+def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_index, power_level_min, power_level_max,
+                                row_indexes,
                                 font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                 num_frames, num_processes, lock_finished_frames, finished_frames, time_start,
-                                g, max_accel_length):
+                                g, max_accel_length, laps_compare_for_time_delta=None):
+    if laps_compare_for_time_delta is None:
+        laps_compare_for_time_delta = []
+
     img_paths = []
 
     img_back = Image.fromarray(np_back)
@@ -156,7 +178,8 @@ def generate_overlay_video_part(i_part, np_back, continus_laps, power_level_min,
                                             x_ratio, y_ratio, size_ratio,
                                             font_normal, font_small,
                                             g, max_accel_length,
-                                            x_min, x_max, y_min, y_max)
+                                            x_min, x_max, y_min, y_max,
+                                            get_time_delta(continues_laps_index, row, laps_compare_for_time_delta))
 
         # save img will trigger shell infrastructure
         # noinspection PyTypeChecker
@@ -207,7 +230,7 @@ def draw_gps_track_on_img_back(continus_laps, img_back, size_ratio, x_ratio, y_r
         df_really_draw_gps_track = df
     for _, row in df_really_draw_gps_track.iterrows():
         # draw gps track
-        circle_radius, x_m_draw, y_m_draw = OverlayImgTool.get_gps_x_y_2_draw(row, size_ratio, x_ratio, y_ratio,
+        circle_radius, x_m_draw, y_m_draw = OverlayImgTool.get_gps_x_y_2_draw(row, x_ratio, y_ratio, size_ratio,
                                                                               x_min, x_max, y_min, y_max)
         # draw line to img_back
         if x_2_draw_last is not None and y_2_draw_last is not None:
