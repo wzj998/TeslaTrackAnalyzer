@@ -33,6 +33,8 @@ COL_NAME_X_M = 'x (m)'  # only in copy of df
 COL_NAME_SPEED_MPH = 'Speed (MPH)'
 COL_NAME_SPEED_KMH = 'Speed (KMH)'
 
+COL_NAME_SPEED_GPS = 'Speed GPS (KMH)'
+
 COL_NAME_BRAKE = 'Brake Pressure (bar)'
 COL_NAME_THROTTLE = 'Throttle Position (%)'
 

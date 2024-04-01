@@ -3,11 +3,14 @@ import datetime
 import numpy as np
 from sklearn.cluster import KMeans
 
+from Structures import ContinusLapsPrepare
 from Structures.ContinusLapsPrepare import *
 
 
 class ContinusLaps:
-    def __init__(self, df_in, altitude=0, b_contain_first_enter_lap=True, b_contain_last_back_lap=True):
+    def __init__(self, df_in,
+                 longtitude_start, latitude_start,
+                 altitude=0, b_contain_first_enter_lap=True, b_contain_last_back_lap=True):
         df = df_in
         add_lap_datetime_col(df)
         laps, laptimes, validlaps = calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_lap)
@@ -15,8 +18,8 @@ class ContinusLaps:
 
         add_kmh_col(df)
 
-        longtitude_start = df.iloc[0][COL_NAME_LONGITUDE]
-        latitude_start = df.iloc[0][COL_NAME_LATITUDE]
+        ContinusLapsPrepare.add_x_m_y_m_col_new(df_in, longtitude_start, latitude_start, altitude)
+        add_gps_kmh_col(df)
 
         self.laps = laps
         self.laptimes = laptimes

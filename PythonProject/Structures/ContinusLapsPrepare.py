@@ -11,6 +11,11 @@ def add_kmh_col(df):
     df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * 1.60934)
 
 
+def add_gps_kmh_col(df):
+    # use COL_NAME_Y_M, COL_NAME_X_M to calculate speed
+    pass
+
+
 def add_lap_datetime_col(df):
     # add new column, just after col ms
     df.insert(df.columns.get_loc(COL_NAME_LAP_MS) + 1, COL_NAME_LAP_DATETIME, '')
@@ -58,7 +63,7 @@ def calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_
     return laps, lap_times_dict, validlaps
 
 
-def add_x_m_y_m_col(df, longtitude_origin, latitude_origin_in, altitude):
+def add_x_m_y_m_col_new(df, longtitude_origin, latitude_origin_in, altitude):
     df.insert(df.columns.get_loc(COL_NAME_LATITUDE) + 1, COL_NAME_Y_M, '')
     df.insert(df.columns.get_loc(COL_NAME_LONGITUDE) + 1, COL_NAME_X_M, '')
 

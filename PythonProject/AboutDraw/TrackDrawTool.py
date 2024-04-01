@@ -87,8 +87,6 @@ def draw_gps_track(continus_laps, lap_start, lap_end,
     df = continus_laps.df
     df_laps_2_draw = df[(df[COL_NAME_LAP] >= lap_start) & (df[COL_NAME_LAP] <= lap_end)].copy()
     laps_2_draw = df_laps_2_draw[COL_NAME_LAP].unique()
-    ContinusLaps.add_x_m_y_m_col(df_laps_2_draw, continus_laps.longtitude_start, continus_laps.latitude_start,
-                                 continus_laps.altitude)
     avg_timing_line_x_m, avg_timing_line_y_m = ContinusLaps.get_avg_timing_line_x_y_m(df_laps_2_draw)
     cool_laps_set = None
     if b_auto_generate_cool_laps_set:

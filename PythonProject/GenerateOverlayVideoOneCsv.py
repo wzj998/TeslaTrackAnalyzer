@@ -1,16 +1,20 @@
+import imageio
 import numpy as np
 import pandas as pd
-import imageio
 
 from AboutDraw import OverlayVideoTool, CurveDrawTool
-from Structures import ContinusLaps, Lap
+from Structures import ContinusLaps
+from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
     csv_path = '../SampleData/telemetry-v1-2024-01-28-13_15_43.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
-    continus_laps = ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 29)
+    df = pd.read_csv(csv_path)
+    longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
+    latitude_start = df[COL_NAME_LATITUDE].iloc[0]
+    continus_laps = ContinusLaps.ContinusLaps(df, longitude_start, latitude_start, 29)
     laps_compare = [
         # Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
         # Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
@@ -18,7 +22,6 @@ def main():
     if len(laps_compare) > 0:
         # 第二快圈作为参考圈
         lap_checkpoints = laps_compare[1]
-        CurveDrawTool.add_col_x_m_y_m_by_lap_checkpoints(laps_compare, lap_checkpoints)
         # we use first lap in laps_2_compare to generate checkpoints
         df_checkpoints_lap = CurveDrawTool.get_df_checkpoints_lap(lap_checkpoints)
         CurveDrawTool.process_laps_for_x_dist([True] * len(laps_compare), df_checkpoints_lap, laps_compare)

@@ -9,7 +9,18 @@ from Structures.ContinusLapsConsts import *
 def main():
     csv_paths = ['../SampleData/telemetry-v1-2024-01-28-13_15_43.csv',
                  '../SampleData/telemetry-v1-2024-01-28-14_44_07.csv']
-    continus_lapss = [ContinusLaps.ContinusLaps(pd.read_csv(csv_path), 29) for csv_path in csv_paths]
+    continus_lapss = []
+    longtitude_start = None
+    latitude_start = None
+    for csv_path in csv_paths:
+        df = pd.read_csv(csv_path)
+        if longtitude_start is None:
+            longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
+            latitude_start = df[COL_NAME_LATITUDE].iloc[0]
+        continus_lapss.append(ContinusLaps.ContinusLaps(df,
+                                                        longtitude_start, latitude_start,
+                                                        29))
+
     for i_continus_laps, continus_laps in enumerate(continus_lapss):
         print('---continus_laps', i_continus_laps, '---')
         print('laps:', continus_laps.laps)

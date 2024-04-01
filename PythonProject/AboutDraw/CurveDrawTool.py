@@ -338,16 +338,7 @@ def update_x_min_y_min(df_lap, x_col_name_2_use, x_max, x_min):
 def draw_x_lap_checkpoint_dist_curves_diff_continus_laps_all_same_timeing_line(laps, cols,
                                                                                title='Lap Checkpoint Dist Curves'):
     lap_checkpoints = laps[0]
-    add_col_x_m_y_m_by_lap_checkpoints(laps, lap_checkpoints)
     # we use first lap in laps to generate checkpoints
     df_checkpoints_lap = get_df_checkpoints_lap(lap_checkpoints)
     return draw_and_return_checkpoints_dist_same_timing_line([True] * len(laps), cols, df_checkpoints_lap,
                                                              laps, title)
-
-
-def add_col_x_m_y_m_by_lap_checkpoints(laps, lap_checkpoints):
-    for lap in laps:
-        ContinusLaps.add_x_m_y_m_col(lap.df_lap,
-                                     lap_checkpoints.continus_laps.longtitude_start,
-                                     lap_checkpoints.continus_laps.latitude_start,
-                                     lap_checkpoints.continus_laps.altitude)

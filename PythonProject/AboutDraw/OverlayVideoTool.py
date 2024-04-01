@@ -42,10 +42,6 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     if max_total_ms_really <= min_total_ms_really:
         raise ValueError(f'max_total_ms_really <= min_total_ms_really: {max_total_ms_really} <= {min_total_ms_really}')
 
-    # for draw gps track
-    ContinusLaps.add_x_m_y_m_col(df, continus_laps.longtitude_start, continus_laps.latitude_start,
-                                 continus_laps.altitude)
-
     np_back = generate_samecolor_np(width, height, backcolor)
 
     img_paths = []
