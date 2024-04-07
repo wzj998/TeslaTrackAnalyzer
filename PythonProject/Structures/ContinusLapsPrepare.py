@@ -1,32 +1,74 @@
 import math
+import os
 
 import pandas as pd
 from typing import List
 
 from Structures.ContinusLapsConsts import *
+import multiprocessing
 
 
 def add_kmh_col(df):
-    df.insert(df.columns.get_loc(COL_NAME_SPEED_MPH) + 1, COL_NAME_SPEED_KMH, '')
+    df.insert(df.columns.get_loc(COL_NAME_SPEED_MPH) + 1, COL_NAME_SPEED_KMH, 0)
     df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * 1.60934)
 
 
+def calculate_speed_gps(df, x, ms_smooth_half_window):
+    row_index_now = x.name
+    row_index_start = row_index_now - ms_smooth_half_window
+    if row_index_start < 0:
+        row_index_start = 0
+    row_index_end = row_index_now + ms_smooth_half_window
+    if row_index_end >= len(df):
+        row_index_end = len(df) - 1
+
+    time = (df.iloc[row_index_end][COL_NAME_TOTAL_MS] - df.iloc[row_index_start][COL_NAME_TOTAL_MS]) / 1000
+    if time == 0:
+        return 0
+
+    x_start = df.iloc[row_index_start][COL_NAME_X_M]
+    y_start = df.iloc[row_index_start][COL_NAME_Y_M]
+    x_end = df.iloc[row_index_end][COL_NAME_X_M]
+    y_end = df.iloc[row_index_end][COL_NAME_Y_M]
+    distance = math.sqrt((x_end - x_start) ** 2 + (y_end - y_start) ** 2)
+
+    speed = distance / time * 3.6
+
+    if row_index_now % 250 == 0:
+        progress = (row_index_now + 1) / len(df)
+        print(f'\rcalculate_speed_gps progress: {progress * 100:.1f}%', end='')
+
+    return speed
+
+
 def add_gps_kmh_col(df):
+    rows_smooth_half_window = 10
+
     # use COL_NAME_Y_M, COL_NAME_X_M to calculate speed
-    pass
+    df.insert(df.columns.get_loc(COL_NAME_Y_M) + 1, COL_NAME_SPEED_GPS, 0)
+
+    df[COL_NAME_SPEED_GPS] = df.apply(lambda x: calculate_speed_gps(df, x, rows_smooth_half_window), axis=1)
+    print('\rcalculate_speed_gps progress: 100.0%')
+    # TODO: use multiprocessing to speed up
+
+    # print all COL_NAME_SPEED_KMH and gps speed in same line
+    print(df[[COL_NAME_SPEED_KMH, COL_NAME_SPEED_GPS]].to_string())
+    # print max speed
+    print('max speed kmh:', df[COL_NAME_SPEED_KMH].max())
+    print('max speed gps:', df[COL_NAME_SPEED_GPS].max())
 
 
 def add_lap_datetime_col(df):
     # add new column, just after col ms
-    df.insert(df.columns.get_loc(COL_NAME_LAP_MS) + 1, COL_NAME_LAP_DATETIME, '')
+    df.insert(df.columns.get_loc(COL_NAME_LAP_MS) + 1, COL_NAME_LAP_DATETIME, 0)
     # use datetime
     df[COL_NAME_LAP_DATETIME] = pd.to_datetime(df[COL_NAME_LAP_MS], unit='ms')
 
 
 # must be called after calculate_every_lap_time
 def add_total_time_col(df, laps: List[int], lap_times: dict):
-    df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 1, COL_NAME_TOTAL_MS, '')
-    df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 2, COL_NAME_TOTAL_DATETIME, '')
+    df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 1, COL_NAME_TOTAL_MS, 0)
+    df.insert(df.columns.get_loc(COL_NAME_LAP_DATETIME) + 2, COL_NAME_TOTAL_DATETIME, 0)
     sum_ms_laps_b4 = 0
     for lap in laps:
         df_lap = df[df[COL_NAME_LAP] == lap]
@@ -64,8 +106,8 @@ def calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_
 
 
 def add_x_m_y_m_col_new(df, longtitude_origin, latitude_origin_in, altitude):
-    df.insert(df.columns.get_loc(COL_NAME_LATITUDE) + 1, COL_NAME_Y_M, '')
-    df.insert(df.columns.get_loc(COL_NAME_LONGITUDE) + 1, COL_NAME_X_M, '')
+    df.insert(df.columns.get_loc(COL_NAME_LATITUDE) + 1, COL_NAME_Y_M, 0)
+    df.insert(df.columns.get_loc(COL_NAME_LONGITUDE) + 1, COL_NAME_X_M, 0)
 
     # caculate distance x, y to start point, according to longitude, latitude and altitude
     earth_radius_2_use, latitude_origin_rad = calculate_earth_radius_2_use(altitude, latitude_origin_in)

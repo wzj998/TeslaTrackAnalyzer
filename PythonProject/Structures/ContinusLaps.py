@@ -19,7 +19,7 @@ class ContinusLaps:
         add_kmh_col(df)
 
         ContinusLapsPrepare.add_x_m_y_m_col_new(df_in, longtitude_start, latitude_start, altitude)
-        add_gps_kmh_col(df)
+        # add_gps_kmh_col(df)
 
         self.laps = laps
         self.laptimes = laptimes
