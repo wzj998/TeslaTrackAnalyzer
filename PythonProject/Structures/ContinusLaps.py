@@ -9,6 +9,7 @@ from Structures.ContinusLapsPrepare import *
 
 class ContinusLaps:
     def __init__(self, df_in,
+                 adjust_ratio,
                  longtitude_start, latitude_start,
                  altitude=0, b_contain_first_enter_lap=True, b_contain_last_back_lap=True):
         df = df_in
@@ -16,7 +17,7 @@ class ContinusLaps:
         laps, laptimes, validlaps = calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_lap)
         add_total_time_col(df, laps, laptimes)
 
-        add_kmh_col(df)
+        add_kmh_col(df, adjust_ratio)
 
         ContinusLapsPrepare.add_x_m_y_m_col_new(df_in, longtitude_start, latitude_start, altitude)
         # add_gps_kmh_col(df)

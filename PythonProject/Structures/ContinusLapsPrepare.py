@@ -8,9 +8,9 @@ from Structures.ContinusLapsConsts import *
 import multiprocessing
 
 
-def add_kmh_col(df):
+def add_kmh_col(df, adjust_ratio):
     df.insert(df.columns.get_loc(COL_NAME_SPEED_MPH) + 1, COL_NAME_SPEED_KMH, 0)
-    df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * 1.60934)
+    df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * 1.60934 * adjust_ratio)
 
 
 def calculate_speed_gps(df, x, ms_smooth_half_window):

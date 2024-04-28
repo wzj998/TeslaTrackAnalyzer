@@ -7,7 +7,7 @@ from Structures.ContinusLapsConsts import *
 
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2023-10-28-16_25_58.csv']
+    csv_paths = ['../SampleData/telemetry-v1-2024-04-27-16_42_54.csv']
 
     continus_lapss = []
     longtitude_start = None
@@ -18,7 +18,7 @@ def main():
             longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
             latitude_start = df[COL_NAME_LATITUDE].iloc[0]
         continus_lapss.append(ContinusLaps.ContinusLaps(df,
-                                                        longtitude_start, latitude_start,
+                                                        642.7 / 670.4, longtitude_start, latitude_start,
                                                         29))
 
     for i_continus_laps, continus_laps in enumerate(continus_lapss):

@@ -21,7 +21,7 @@ def main():
             longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
             latitude_start = df[COL_NAME_LATITUDE].iloc[0]
         continus_lapss.append(ContinusLaps.ContinusLaps(df,
-                                                        longtitude_start, latitude_start,
+                                                        642.7 / 670.4, longtitude_start, latitude_start,
                                                         29))
 
     for i_continus_laps, continus_laps in enumerate(continus_lapss):

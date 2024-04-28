@@ -8,13 +8,14 @@ from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
-    csv_path = '../SampleData/telemetry-v1-2024-01-28-13_15_43.csv'
+    csv_path = '../SampleData/telemetry-v1-2024-04-27-16_42_54.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     df = pd.read_csv(csv_path)
     longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
     latitude_start = df[COL_NAME_LATITUDE].iloc[0]
-    continus_laps = ContinusLaps.ContinusLaps(df, longitude_start, latitude_start, 29)
+    continus_laps = ContinusLaps.ContinusLaps(df,
+                                              642.7 / 670.4, longitude_start, latitude_start, 29)
     laps_compare = [
         # Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
         # Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
@@ -28,7 +29,7 @@ def main():
 
     # generate overlay video, background is purple
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_laps, 0, 1280, 960,
-                                                                  100, 110, laps_compare)
+                                                                  None, None, laps_compare)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)
     for i_img_path in range(len(img_paths)):
