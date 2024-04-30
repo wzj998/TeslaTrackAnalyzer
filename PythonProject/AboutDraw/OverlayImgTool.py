@@ -114,7 +114,7 @@ def draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio, s
               50, AnchorHorizontal.CENTER)
     # show speed
     speed = row[COL_NAME_SPEED_KMH]
-    draw_text(draw, f'{speed:.0f} km/h', 1280 / 2, 840 + (g_force_big_radius + 14 + 20 + 10) / y_ratio * size_ratio,
+    draw_text(draw, f'{speed:.1f} km/h', 1280 / 2, 840 + (g_force_big_radius + 14 + 20 + 10) / y_ratio * size_ratio,
               font,
               x_ratio, y_ratio,
               size_ratio,
