@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 
 from AboutDraw import OverlayVideoTool, CurveDrawTool
-from Structures import ContinusLaps
+from Structures import ContinusLaps, Lap
 from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
-    csv_path = '../SampleData/telemetry-v1-2024-02-25-15_43_51.csv'
+    csv_path = '../SampleData/telemetry-v1-2024-05-12-14_03_44.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     df = pd.read_csv(csv_path)
@@ -17,8 +17,8 @@ def main():
     continus_laps = ContinusLaps.ContinusLaps(df,
                                               669.2 / 670.4, longitude_start, latitude_start, 4)
     laps_compare = [
-        # Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
-        # Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
+        Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
+        Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
     ]  # empty means do not show time delta
     if len(laps_compare) > 0:
         # 第二快圈作为参考圈
