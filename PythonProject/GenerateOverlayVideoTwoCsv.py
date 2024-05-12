@@ -8,21 +8,23 @@ from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-01-28-13_15_43.csv',
-                 '../SampleData/telemetry-v1-2024-01-28-14_44_07.csv']
+    csv_paths = ['../SampleData/telemetry-v1-2024-02-25-15_43_51.csv',
+                 '../SampleData/telemetry-v1-2024-05-12-14_03_44.csv']
+    adjust_ratios = [669.2 / 670.4, 642.7 / 670.4]
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     continus_lapss = []
-    longtitude_start = None
+    longitude_start = None
     latitude_start = None
-    for csv_path in csv_paths:
+    for i_csv_path in range(len(csv_paths)):
+        csv_path = csv_paths[i_csv_path]
         df = pd.read_csv(csv_path)
-        if longtitude_start is None:
-            longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
+        if longitude_start is None:
+            longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
             latitude_start = df[COL_NAME_LATITUDE].iloc[0]
-        continus_lapss.append(ContinusLaps.ContinusLaps(df,
-                                                        642.7 / 670.4, longtitude_start, latitude_start,
-                                                        29))
+        continus_lapss.append(ContinusLaps.ContinusLaps(df, adjust_ratios[i_csv_path],
+                                                        longitude_start, latitude_start,  # 669.2
+                                                        4))
 
     for i_continus_laps, continus_laps in enumerate(continus_lapss):
         print('---continus_laps', i_continus_laps, '---')

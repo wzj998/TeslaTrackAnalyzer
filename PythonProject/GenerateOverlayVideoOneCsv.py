@@ -8,14 +8,14 @@ from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
-    csv_path = '../SampleData/telemetry-v1-2024-04-27-16_42_54.csv'
+    csv_path = '../SampleData/telemetry-v1-2024-02-25-15_43_51.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     df = pd.read_csv(csv_path)
     longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
     latitude_start = df[COL_NAME_LATITUDE].iloc[0]
     continus_laps = ContinusLaps.ContinusLaps(df,
-                                              642.7 / 670.4, longitude_start, latitude_start, 29)
+                                              669.2 / 670.4, longitude_start, latitude_start, 4)
     laps_compare = [
         # Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
         # Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
