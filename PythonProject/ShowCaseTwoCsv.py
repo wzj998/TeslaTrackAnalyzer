@@ -1,26 +1,43 @@
 import pandas as pd
 from matplotlib import pyplot as plt
 
-from Structures import ContinusLaps, Lap
+from Structures import ContinusLaps, Lap, ContinusLapsPrepare
 from AboutDraw import CurveDrawTool, TrackDrawTool
 from Structures.ContinusLapsConsts import *
-
+from Utils.WheelUtil import calculate_wheel_diameter
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-02-25-15_43_51.csv',
-                 '../SampleData/telemetry-v1-2024-05-12-14_03_44.csv']
-    adjust_ratios = [669.2 / 670.4, 642.7 / 670.4]
+    csv_paths = ['../SampleData/telemetry-v1-2024-06-16-18_33_19.csv',
+                 '../SampleData/telemetry-v1-2025-01-05-16_44_02.csv', ]
+    
+    dfs = []
+    max_kmh_every_laps = []
+    for i_csv_path in range(len(csv_paths)):
+        df = pd.read_csv(csv_paths[i_csv_path])
+        dfs.append(df)    
+        max_kmh_every_lap = ContinusLapsPrepare.get_max_kmh_every_lap_before_adjust(df)        
+        print('max_kmh_every_lap:', max_kmh_every_lap)
+        max_kmh_every_laps.append(max_kmh_every_lap)
+
+    # original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
+    # adjust_ratios = [calculate_wheel_diameter(265, 35, 18) / original_wheel_diameter,
+    #                  calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter]
+
+    adjust_ratios = [
+        ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[0], 1, [171.49, 164.35, 170.51, 164.38]),
+        ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[1], 2, [169.9, 169.68, 159.88, 167.61])
+    ]
+    print('adjust_ratios:', adjust_ratios)
 
     continus_lapss = []
     longitude_start = None
     latitude_start = None
     # for csv_path in csv_paths:
-    for i_csv_path in range(len(csv_paths)):
-        csv_path = csv_paths[i_csv_path]
-        df = pd.read_csv(csv_path)
+    for i_csv_path in range(len(dfs)):
+        df = dfs[i_csv_path]    
         if longitude_start is None:
             longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
-            latitude_start = df[COL_NAME_LATITUDE].iloc[0]
+            latitude_start = df[COL_NAME_LATITUDE].iloc[0]        
         continus_lapss.append(ContinusLaps.ContinusLaps(df, adjust_ratios[i_csv_path],
                                                         longitude_start, latitude_start,
                                                         4))

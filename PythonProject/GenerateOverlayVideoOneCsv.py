@@ -3,22 +3,27 @@ import numpy as np
 import pandas as pd
 
 from AboutDraw import OverlayVideoTool, CurveDrawTool
-from Structures import ContinusLaps, Lap
+from Structures import ContinusLaps, Lap, ContinusLapsPrepare
 from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
+from Utils.WheelUtil import calculate_wheel_diameter
 
 
 def main():
-    csv_path = '../SampleData/telemetry-v1-2024-05-12-14_03_44.csv'
+    csv_path = '../SampleData/telemetry-v1-2025-01-05-16_44_02.csv'
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     df = pd.read_csv(csv_path)
     longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
     latitude_start = df[COL_NAME_LATITUDE].iloc[0]
+    original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
+    max_kmh_every_lap = ContinusLapsPrepare.get_max_kmh_every_lap_before_adjust(df)
+    print('max_kmh_every_lap:', max_kmh_every_lap)
     continus_laps = ContinusLaps.ContinusLaps(df,
-                                              669.2 / 670.4, longitude_start, latitude_start, 4)
+                                              calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter,
+                                              longitude_start, latitude_start, 4)
     laps_compare = [
-        Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
-        Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
+        # Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
+        # Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
     ]  # empty means do not show time delta
     if len(laps_compare) > 0:
         # 第二快圈作为参考圈
@@ -28,7 +33,7 @@ def main():
         CurveDrawTool.process_laps_for_x_dist([True] * len(laps_compare), df_checkpoints_lap, laps_compare)
 
     # generate overlay video, background is purple
-    img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_laps, 0, 1280, 960,
+    img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_laps, 0, 1280, 720,
                                                                   None, None, laps_compare)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)

@@ -3,14 +3,14 @@ import pandas as pd
 import imageio
 
 from AboutDraw import OverlayVideoTool, CurveDrawTool
-from Structures import ContinusLaps, Lap
+from Structures import ContinusLaps, Lap, ContinusLapsPrepare
 from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
 
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-02-25-15_43_51.csv',
-                 '../SampleData/telemetry-v1-2024-05-12-14_03_44.csv']
-    adjust_ratios = [669.2 / 670.4, 642.7 / 670.4]
+    csv_paths = ['../SampleData/telemetry-v1-2024-11-24-12_16_32.csv',
+                 '../SampleData/telemetry-v1-2024-11-24-12_29_05.csv', ]
+    adjust_ratios = [642.7 / 670.4, 642.7 / 670.4]
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     continus_lapss = []
@@ -19,6 +19,8 @@ def main():
     for i_csv_path in range(len(csv_paths)):
         csv_path = csv_paths[i_csv_path]
         df = pd.read_csv(csv_path)
+        max_kmh_every_lap = ContinusLapsPrepare.get_max_kmh_every_lap_before_adjust(df)
+        print('max_kmh_every_lap:', max_kmh_every_lap)
         if longitude_start is None:
             longitude_start = df[COL_NAME_LONGITUDE].iloc[0]
             latitude_start = df[COL_NAME_LATITUDE].iloc[0]
@@ -45,7 +47,7 @@ def main():
 
     # generate overlay video, background is purple
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lapss[1], 1, 1920, 1080,
-                                                                  None, None, laps_compare)
+                                                                  None, 100, laps_compare)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)
     for i_img_path in range(len(img_paths)):

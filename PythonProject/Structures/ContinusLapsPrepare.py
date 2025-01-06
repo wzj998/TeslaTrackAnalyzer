@@ -5,7 +5,40 @@ import pandas as pd
 from typing import List
 
 from Structures.ContinusLapsConsts import *
+from Utils.MyMath import EPS
 import multiprocessing
+
+def get_max_kmh_every_lap_before_adjust(df):
+    ans = {}
+    # 获取每圈最大速度
+    laps = df[COL_NAME_LAP].unique()
+    for lap in laps:
+        df_lap = df[df[COL_NAME_LAP] == lap]
+        ans[lap] = df_lap[COL_NAME_SPEED_MPH].max() * 1.60934  # 转换为km/h
+    return ans
+
+
+def get_avg_adjust_ratio(max_kmh_every_lap, lap_index_start, max_kmh_gps_list):
+    sum_ratio = 0
+    count_ratio = 0
+    for i_lap in range(lap_index_start, len(max_kmh_gps_list)):
+        index_max_kmh_every_lap = lap_index_start + i_lap
+        if index_max_kmh_every_lap not in max_kmh_every_lap:
+            break
+        kmh_df = max_kmh_every_lap[index_max_kmh_every_lap]
+        kmh_gps = max_kmh_gps_list[i_lap]
+        if kmh_df < EPS:
+            raise Exception("kmh_df too small")
+        ratio_now = kmh_gps / kmh_df
+        print(f"{kmh_gps}/{kmh_df}={ratio_now}")
+        sum_ratio += ratio_now
+        count_ratio += 1
+
+    if count_ratio == 0:
+        raise Exception("count_ratio is 0")
+    avg_ratio = sum_ratio / count_ratio
+    print(f"avg_ratio={avg_ratio}")
+    return avg_ratio    
 
 
 def add_kmh_col(df, adjust_ratio):
@@ -82,7 +115,7 @@ def add_total_time_col(df, laps: List[int], lap_times: dict):
     df.loc[df[df[COL_NAME_LAP] == 0].index, COL_NAME_TOTAL_DATETIME] = pd.to_datetime(0, unit='ms')
 
 
-def calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_lap) -> (list, dict):
+def calculate_every_lap_time(df, b_contain_first_enter_lap, b_contain_last_back_lap):
     laps = df[COL_NAME_LAP].unique().tolist()
     lap_times_dict = {}
     # find rows col lap changed

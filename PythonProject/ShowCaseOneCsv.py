@@ -2,24 +2,29 @@ import pandas as pd
 from matplotlib import pyplot as plt
 
 from AboutDraw import CurveDrawTool, TrackDrawTool
-from Structures import ContinusLaps
+from Structures import ContinusLaps, ContinusLapsPrepare
 from Structures.ContinusLapsConsts import *
+from Utils.WheelUtil import calculate_wheel_diameter
 
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-02-25-15_43_51.csv']
+    csv_path = '../SampleData/telemetry-v1-2025-01-05-16_44_02.csv'
 
     continus_lapss = []
     longtitude_start = None
     latitude_start = None
-    for csv_path in csv_paths:
-        df = pd.read_csv(csv_path)
-        if longtitude_start is None:
-            longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
-            latitude_start = df[COL_NAME_LATITUDE].iloc[0]
-        continus_lapss.append(ContinusLaps.ContinusLaps(df,
-                                                        642.7 / 670.4, longtitude_start, latitude_start,
-                                                        4))
+    original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
+    
+    df = pd.read_csv(csv_path)
+    max_kmh_every_lap = ContinusLapsPrepare.get_max_kmh_every_lap_before_adjust(df)
+    print('max_kmh_every_lap:', max_kmh_every_lap)
+    if longtitude_start is None:
+        longtitude_start = df[COL_NAME_LONGITUDE].iloc[0]
+        latitude_start = df[COL_NAME_LATITUDE].iloc[0]        
+    continus_lapss.append(ContinusLaps.ContinusLaps(df,
+                                                    calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter,
+                                                    longtitude_start, latitude_start,
+                                                    4))
 
     for i_continus_laps, continus_laps in enumerate(continus_lapss):
         print('---continus_laps', i_continus_laps, '---')
