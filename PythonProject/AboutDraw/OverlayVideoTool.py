@@ -168,9 +168,8 @@ def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_i
     delta_progress_2_report = 0.01  # * num_processes
     for i, index in enumerate(row_indexes):
         row = df.iloc[index]
-
         img = img_back.copy()
-        OverlayImgTool.draw_overlays_on_img(img, row, power_level_min, power_level_max,
+        OverlayImgTool.draw_overlays_on_img(img, df, index, power_level_min, power_level_max,
                                             x_ratio, y_ratio, size_ratio,
                                             font_normal, font_small,
                                             g, max_accel_length,

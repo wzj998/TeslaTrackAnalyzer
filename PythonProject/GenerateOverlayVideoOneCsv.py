@@ -34,7 +34,7 @@ def main():
 
     # generate overlay video, background is purple
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_laps, 0, 1280, 720,
-                                                                  None, None, laps_compare)
+                                                                  112, 122, laps_compare)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)
     for i_img_path in range(len(img_paths)):

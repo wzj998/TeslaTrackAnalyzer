@@ -146,7 +146,7 @@ def draw_steering_wheel(draw, steer_angle, center_x, center_y, x_ratio, y_ratio,
 
 
 def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio,
-                        radius, sphere_radius=7):
+                        radius, rows_remain=None, sphere_radius=7):
     # draw cross
     # 不会因为画面长宽变化，圆就不是圆了
     length_cross = radius * size_ratio * 1.2
@@ -172,12 +172,79 @@ def draw_g_force_circle(draw, long_accel, lat_accel, max_accel_length, center_x,
     # draw inner g sphere, max_accel_length对应radius
     # 不会因为画面长宽变化，圆就不是圆了
     # lat_accel是横向加速度，对应x轴，long_accel是纵向加速度，对应y轴
+    if not(rows_remain is None or len(rows_remain) <= 1):
+        draw_g_force_point_lines(draw, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio, radius, rows_remain)
+
+    draw_g_force_point(draw, lat_accel, long_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio, radius, sphere_radius)        
+
+def draw_g_force_point(draw, lat_accel, long_accel, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio, radius, sphere_radius):
+    """在 G 力圆中绘制一个点，表示当前的横向和纵向加速度
+    
+    Args:
+        draw: PIL Draw对象
+        lat_accel: 横向加速度
+        long_accel: 纵向加速度
+        max_accel_length: 最大加速度值
+        center_x: 圆心x坐标
+        center_y: 圆心y坐标
+        x_ratio: x方向缩放比例
+        y_ratio: y方向缩放比例
+        size_ratio: 大小缩放比例
+        radius: G力圆半径
+        sphere_radius: G力点半径
+    """
     x_offset = lat_accel / max_accel_length * radius * size_ratio
     y_offset = long_accel / max_accel_length * radius * size_ratio
     x_sphere = center_x * x_ratio + x_offset
     y_sphere = center_y * y_ratio + y_offset
     draw.ellipse((x_sphere - sphere_radius * size_ratio,
-                  y_sphere - sphere_radius * size_ratio,
-                  x_sphere + sphere_radius * size_ratio,
-                  y_sphere + sphere_radius * size_ratio),
-                 fill=(255, 255, 255), outline=(0, 0, 0), width=2)
+                y_sphere - sphere_radius * size_ratio,
+                x_sphere + sphere_radius * size_ratio,
+                y_sphere + sphere_radius * size_ratio),
+                fill=(255, 255, 255), outline=(0, 0, 0), width=2)
+    
+def draw_g_force_point_lines(draw, max_accel_length, center_x, center_y, x_ratio, y_ratio, size_ratio, radius, rows_remain):
+    """在 G 力圆中绘制轨迹线，表示历史点之间的轨迹
+    
+    Args:
+        draw: PIL Draw对象
+        max_accel_length: 最大加速度值
+        center_x: 圆心x坐标
+        center_y: 圆心y坐标
+        x_ratio: x方向缩放比例
+        y_ratio: y方向缩放比例
+        size_ratio: 大小缩放比例
+        radius: G力圆半径
+        rows_remain: 包含历史数据点的列表，每个点包含 [lat_accel, long_accel]
+    """
+    if not rows_remain or len(rows_remain) < 2:  # 如果没有足够的历史点，直接返回
+        return
+        
+    # 遍历历史点，绘制轨迹线
+    for i in range(len(rows_remain) - 1):
+        if i >= len(rows_remain) - 1:
+            break
+        
+        row = rows_remain[i]
+        next_row = rows_remain[i + 1]
+        
+        # 计算当前历史点的位置
+        lat_accel_current = row[0]
+        long_accel_current = row[1]
+        x_offset_current = lat_accel_current / max_accel_length * radius * size_ratio
+        y_offset_current = long_accel_current / max_accel_length * radius * size_ratio
+        x_point_current = center_x * x_ratio + x_offset_current
+        y_point_current = center_y * y_ratio + y_offset_current
+        
+        # 计算下一个历史点的位置
+        lat_accel_next = next_row[0]
+        long_accel_next = next_row[1]
+        x_offset_next = lat_accel_next / max_accel_length * radius * size_ratio
+        y_offset_next = long_accel_next / max_accel_length * radius * size_ratio
+        x_point_next = center_x * x_ratio + x_offset_next
+        y_point_next = center_y * y_ratio + y_offset_next
+        
+        # 绘制连接线
+        draw.line((x_point_current, y_point_current, x_point_next, y_point_next),
+                 fill=(255, 255, 255), width=max(int(2 * size_ratio), 1))
+    

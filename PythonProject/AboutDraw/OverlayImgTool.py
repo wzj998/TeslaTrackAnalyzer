@@ -6,19 +6,38 @@ from AboutDraw.OverlayVehicleState import draw_vehicle_state
 from Structures.ContinusLapsConsts import *
 
 
-def draw_overlays_on_img(img: Image, row: pd.Series, power_level_min: int, power_level_max: int,
+def draw_overlays_on_img(img: Image, df: pd.DataFrame, index: int, power_level_min: int, power_level_max: int,
                          x_ratio: float, y_ratio: float, size_ratio: float,
                          font_normal: ImageFont, font_small: ImageFont,
                          g: float, max_accel_length: float,
                          x_min: float, x_max: float, y_min: float, y_max: float,
-                         time_delta: float):
+                         time_delta: float, seconds_draw_g_remain: float = 3):
     draw = ImageDraw.Draw(img)
+
+    row = df.iloc[index]
+
+    # get rows remain, time >= now - seconds_draw_g_remain, every COL_NAME_TOTAL_MS remain one row
+    current_time = row[COL_NAME_TOTAL_MS]
+    min_time = current_time - seconds_draw_g_remain * 1000  # 转换为毫秒
+    
+    # 获取时间范围内的数据
+    mask = (df[COL_NAME_TOTAL_MS] >= min_time) & (df[COL_NAME_TOTAL_MS] <= current_time)
+    filtered_df = df[mask]
+    
+    # 按 COL_NAME_TOTAL_MS 分组，每组只保留最后一行
+    rows_remain = filtered_df.groupby(COL_NAME_TOTAL_MS).last().reset_index()
+    
+    # 按时间排序
+    rows_remain = rows_remain.sort_values(by=COL_NAME_TOTAL_MS, ascending=True)
+    
+    # 转换为列表格式，每行包含 [lat_accel, long_accel]
+    rows_remain = rows_remain[[COL_NAME_LAT_ACCEL, COL_NAME_LONG_ACCEL]].values.tolist()
 
     draw_left_top(draw, font_normal, row, x_ratio, y_ratio, size_ratio, time_delta)
     draw_right_top(draw, row, x_ratio, y_ratio, size_ratio, x_min, x_max, y_min, y_max)
     draw_left_bottom(draw, font_small, row, 140, 740, x_ratio, y_ratio, size_ratio)
     draw_right_bottom(draw, font_normal, power_level_max, power_level_min, row, x_ratio, y_ratio, size_ratio)
-    draw_center_bottom(draw, font_normal, g, max_accel_length, row, x_ratio, y_ratio, size_ratio)
+    draw_center_bottom(draw, font_normal, g, max_accel_length, row, x_ratio, y_ratio, size_ratio, rows_remain)
 
 
 def draw_left_top(draw, font, row, x_ratio, y_ratio, _, time_delta: float):
@@ -87,11 +106,11 @@ def draw_left_bottom(draw, font, row,
                        font, x_ratio, y_ratio, size_ratio)
 
 
-def draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio, size_ratio):
+def draw_center_bottom(draw, font, g, max_accel_length, row, x_ratio, y_ratio, size_ratio, rows_remain):
     g_force_big_radius = 40
     # draw g-force circle
     draw_g_force_circle(draw, row[COL_NAME_LONG_ACCEL], row[COL_NAME_LAT_ACCEL], max_accel_length, 1280 / 2, 840,
-                        x_ratio, y_ratio, size_ratio, g_force_big_radius)
+                        x_ratio, y_ratio, size_ratio, g_force_big_radius, rows_remain)
     accel_length = math.sqrt(row[COL_NAME_LONG_ACCEL] ** 2 + row[COL_NAME_LAT_ACCEL] ** 2)
     # g-force length
     draw_text(draw, f'total: {accel_length / g:.2f} g', 1280 / 2,
