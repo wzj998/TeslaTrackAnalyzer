@@ -134,17 +134,14 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-def get_time_delta(row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_compare_really: int) -> float:
-    ans_delta_2_check_point_lap = None
-    index_lap_drawing = row[COL_NAME_LAP]
-    # find lap with matching lap_index
-    laps_drawing = [lap for lap in laps_compare_for_time_delta if lap.lap_index == index_lap_drawing]
-    lap_drawing = laps_drawing[0] if len(laps_drawing) > 0 else None
-    if lap_drawing is not None:
-        df_filtered = lap_drawing.df_lap[lap_drawing.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
-        if len(df_filtered) > 0:  # 如果找到了符合条件的行
-            row_in_lap = df_filtered.iloc[0]
-            ans_delta_2_check_point_lap = row_in_lap[COL_NAME_TIME_DELTA]
+def get_time_delta(continus_lap_index, row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_compare_really: int) -> float:
+    ans_delta_2_check_point_lap = None    
+    # find lap with matching lap_index    
+    lap_drawing = laps_compare_for_time_delta[continus_lap_index]    
+    df_filtered = lap_drawing.df_lap[lap_drawing.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
+    if len(df_filtered) > 0:  # 如果找到了符合条件的行
+        row_in_lap = df_filtered.iloc[0]
+        ans_delta_2_check_point_lap = row_in_lap[COL_NAME_TIME_DELTA]
     
     if ans_delta_2_check_point_lap is None:
         return None
@@ -152,10 +149,9 @@ def get_time_delta(row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_comp
     if i_lap_2_compare_really is None:
         return ans_delta_2_check_point_lap
 
-    ans_delta_2_really_compare = None
-    laps_really_compare = [lap for lap in laps_compare_for_time_delta if lap.lap_index == i_lap_2_compare_really]
-    lap_really_compare = laps_really_compare[0] if len(laps_really_compare) > 0 else None
-    if lap_really_compare is not None:
+    ans_delta_2_really_compare = None    
+    if i_lap_2_compare_really is not None:
+        lap_really_compare = laps_compare_for_time_delta[i_lap_2_compare_really]
         df_filtered = lap_really_compare.df_lap[lap_really_compare.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
         if len(df_filtered) > 0:  # 如果找到了符合条件的行
             row_in_lap = df_filtered.iloc[0]
@@ -192,7 +188,7 @@ def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_i
                                             font_normal, font_small,
                                             g, max_accel_length,
                                             x_min, x_max, y_min, y_max,
-                                            get_time_delta(row, laps_compare_for_time_delta, i_lap_2_compare_really))
+                                            get_time_delta(continues_laps_index, row, laps_compare_for_time_delta, i_lap_2_compare_really))
 
         # save img will trigger shell infrastructure
         # noinspection PyTypeChecker
