@@ -29,7 +29,7 @@ def main():
         lap_checkpoints = laps_compare[0]        
         df_checkpoints_lap = CurveDrawTool.get_df_checkpoints_lap(lap_checkpoints)
         CurveDrawTool.process_laps_for_x_dist([True] * len(laps_compare), df_checkpoints_lap, laps_compare)
-    i_lap_compare_really = 1
+    i_lap_compare_really = list(continus_laps.validlap_times_dict_sorted.keys())[1]
     # generate overlay video, background is purple
     img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_laps, 0, 1280, 720,
                                                                   480, 600, laps_compare, i_lap_compare_really)
