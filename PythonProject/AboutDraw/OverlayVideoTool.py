@@ -153,9 +153,8 @@ def get_time_delta(row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_comp
         return ans_delta_2_check_point_lap
 
     ans_delta_2_really_compare = None
-    laps_really_compare = [lap for lap in laps_compare_for_time_delta if lap.lap_index == i_lap_2_compare_really]
-    lap_really_compare = laps_really_compare[0] if len(laps_really_compare) > 0 else None
-    if lap_really_compare is not None:
+    if i_lap_2_compare_really is not None:
+        lap_really_compare = laps_compare_for_time_delta[i_lap_2_compare_really]
         df_filtered = lap_really_compare.df_lap[lap_really_compare.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
         if len(df_filtered) > 0:  # 如果找到了符合条件的行
             row_in_lap = df_filtered.iloc[0]
