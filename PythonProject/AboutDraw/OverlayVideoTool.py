@@ -22,7 +22,7 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
                                      continues_laps_index: int,
                                      width, height,
                                      min_total_s=None, max_total_s=None,
-                                     laps_2_compare_for_time_delta=None,
+                                     laps_2_compare_for_time_delta=None, i_lap_2_compare_really=None,
                                      backcolor=(128, 0, 128), fps=60) -> list:
     frame_ms_delta = 1000 / fps
     lap_valid_start = 1
@@ -122,7 +122,7 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
                                         font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                         num_frames, num_processes,
                                         lock_finished_frames, finished_frames, time_start_really_draw,
-                                        g, max_accel_length, laps_2_compare_for_time_delta))
+                                        g, max_accel_length, laps_2_compare_for_time_delta, i_lap_2_compare_really))
         results.append(result)
     pool.close()
     pool.join()
@@ -134,25 +134,43 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-def get_time_delta(continues_laps_index, row, laps_compare_for_time_delta: List[Lap.Lap]) -> float:
-    ans = None
-    for lap in laps_compare_for_time_delta:
-        if lap.continus_laps_index == continues_laps_index and lap.lap_index == row[COL_NAME_LAP]:
-            total_ms_should_be = row[COL_NAME_TOTAL_MS]
-            # find first row_in_lap with COL_NAME_TOTAL_MS >= total_ms_should_be
-            row_in_lap = lap.df_lap[lap.df_lap[COL_NAME_TOTAL_MS] >= total_ms_should_be].iloc[0]
-            # if we find row_in_lap
-            if not row_in_lap.empty:
-                ans = row_in_lap[COL_NAME_TIME_DELTA]
-            break
-    return ans
+def get_time_delta(row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_compare_really: int) -> float:
+    ans_delta_2_check_point_lap = None
+    index_lap_drawing = row[COL_NAME_LAP]
+    # find lap with matching lap_index
+    laps_drawing = [lap for lap in laps_compare_for_time_delta if lap.lap_index == index_lap_drawing]
+    lap_drawing = laps_drawing[0] if len(laps_drawing) > 0 else None
+    if lap_drawing is not None:
+        df_filtered = lap_drawing.df_lap[lap_drawing.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
+        if len(df_filtered) > 0:  # 如果找到了符合条件的行
+            row_in_lap = df_filtered.iloc[0]
+            ans_delta_2_check_point_lap = row_in_lap[COL_NAME_TIME_DELTA]
+    
+    if ans_delta_2_check_point_lap is None:
+        return None
+
+    if i_lap_2_compare_really is None:
+        return ans_delta_2_check_point_lap
+
+    ans_delta_2_really_compare = None
+    laps_really_compare = [lap for lap in laps_compare_for_time_delta if lap.lap_index == i_lap_2_compare_really]
+    lap_really_compare = laps_really_compare[0] if len(laps_really_compare) > 0 else None
+    if lap_really_compare is not None:
+        df_filtered = lap_really_compare.df_lap[lap_really_compare.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
+        if len(df_filtered) > 0:  # 如果找到了符合条件的行
+            row_in_lap = df_filtered.iloc[0]
+            ans_delta_2_really_compare = row_in_lap[COL_NAME_TIME_DELTA]
+    if ans_delta_2_really_compare is not None:
+        return ans_delta_2_check_point_lap - ans_delta_2_really_compare
+    
+    return None
 
 
 def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_index, power_level_min, power_level_max,
                                 row_indexes,
                                 font_normal, font_small, x_ratio, y_ratio, size_ratio,
                                 num_frames, num_processes, lock_finished_frames, finished_frames, time_start,
-                                g, max_accel_length, laps_compare_for_time_delta=None):
+                                g, max_accel_length, laps_compare_for_time_delta=None, i_lap_2_compare_really=None):
     if laps_compare_for_time_delta is None:
         laps_compare_for_time_delta = []
 
@@ -174,7 +192,7 @@ def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_i
                                             font_normal, font_small,
                                             g, max_accel_length,
                                             x_min, x_max, y_min, y_max,
-                                            get_time_delta(continues_laps_index, row, laps_compare_for_time_delta))
+                                            get_time_delta(row, laps_compare_for_time_delta, i_lap_2_compare_really))
 
         # save img will trigger shell infrastructure
         # noinspection PyTypeChecker
