@@ -19,7 +19,7 @@ def generate_samecolor_np(width, height, color):
 
 
 def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
-                                     continues_laps_index: int,
+                                     continus_laps_index: int,
                                      width, height,
                                      min_total_s=None, max_total_s=None,
                                      laps_2_compare_for_time_delta=None, i_lap_2_compare_really=None,
@@ -116,7 +116,7 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     time_start_really_draw = time.time()
     for i_part, row_indexes in enumerate(row_indexes_really_deal_split):
         result = pool.apply_async(generate_overlay_video_part,
-                                  args=(i_part, np_back, continus_laps, continues_laps_index,
+                                  args=(i_part, np_back, continus_laps, continus_laps_index,
                                         power_level_min, power_level_max,
                                         row_indexes,
                                         font_normal, font_small, x_ratio, y_ratio, size_ratio,
@@ -134,11 +134,11 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     return img_paths
 
 
-def get_time_delta(row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_compare_really: int) -> float:
+def get_time_delta(continus_laps_index, row, laps_compare_for_time_delta: List[Lap.Lap], i_lap_2_compare_really: int) -> float:
     ans_delta_2_check_point_lap = None
     index_lap_drawing = row[COL_NAME_LAP]
     # find lap with matching lap_index
-    laps_drawing = [lap for lap in laps_compare_for_time_delta if lap.lap_index == index_lap_drawing]
+    laps_drawing = [lap for lap in laps_compare_for_time_delta if lap.continus_laps_index == continus_laps_index and lap.lap_index == index_lap_drawing]
     lap_drawing = laps_drawing[0] if len(laps_drawing) > 0 else None
     if lap_drawing is not None:
         df_filtered = lap_drawing.df_lap[lap_drawing.df_lap[COL_NAME_LAP_MS] >= row[COL_NAME_LAP_MS]]
@@ -191,7 +191,7 @@ def generate_overlay_video_part(i_part, np_back, continus_laps, continues_laps_i
                                             font_normal, font_small,
                                             g, max_accel_length,
                                             x_min, x_max, y_min, y_max,
-                                            get_time_delta(row, laps_compare_for_time_delta, i_lap_2_compare_really))
+                                            get_time_delta(continues_laps_index, row, laps_compare_for_time_delta, i_lap_2_compare_really))
 
         # save img will trigger shell infrastructure
         # noinspection PyTypeChecker

@@ -5,12 +5,14 @@ import imageio
 from AboutDraw import OverlayVideoTool, CurveDrawTool
 from Structures import ContinusLaps, Lap, ContinusLapsPrepare
 from Structures.ContinusLapsConsts import COL_NAME_LONGITUDE, COL_NAME_LATITUDE
-
+from Utils.WheelUtil import calculate_wheel_diameter
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-11-24-12_16_32.csv',
-                 '../SampleData/telemetry-v1-2024-11-24-12_29_05.csv', ]
-    adjust_ratios = [642.7 / 670.4, 642.7 / 670.4]
+    csv_paths = ['../SampleData/telemetry-v1-2024-06-16-18_33_19.csv',
+                 '../SampleData/telemetry-v1-2025-01-11-14_41_45.csv', ]
+    original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
+    adjust_ratios = [calculate_wheel_diameter(265, 35, 18) / original_wheel_diameter,
+                     calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter]
     out_video_path = '../SampleOut/overlay_video.mp4'
 
     continus_lapss = []
@@ -38,7 +40,8 @@ def main():
     # 两个csv文件各自的最快圈对比，第一个csv文件的最快圈作为参考圈
     laps_compare = [
         Lap.Lap(continus_lapss[0], 0, list(continus_lapss[0].validlap_times_dict_sorted.keys())[0]),
-        Lap.Lap(continus_lapss[1], 1, list(continus_lapss[1].validlap_times_dict_sorted.keys())[0])
+        Lap.Lap(continus_lapss[1], 1, 3),
+        Lap.Lap(continus_lapss[1], 1, 7)
     ]
     lap_checkpoints = laps_compare[0]
     # we use first lap in laps_2_compare to generate checkpoints
@@ -46,8 +49,8 @@ def main():
     CurveDrawTool.process_laps_for_x_dist([True] * len(laps_compare), df_checkpoints_lap, laps_compare)
 
     # generate overlay video, background is purple
-    img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lapss[1], 1, 1920, 1080,
-                                                                  None, 100, laps_compare)
+    img_paths = OverlayVideoTool.generate_overlay_video_img_paths(continus_lapss[1], 1, 1280, 720,
+                                                                  280, 290, laps_compare)
     # save overlay video using ImageIO
     writer = imageio.get_writer(out_video_path, fps=60, macro_block_size=None)
     for i_img_path in range(len(img_paths)):

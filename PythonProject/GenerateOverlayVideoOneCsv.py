@@ -23,7 +23,7 @@ def main():
                                               longitude_start, latitude_start, 4)
     laps_compare = [
         Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[0]),
-        Lap.Lap(continus_laps, 1, list(continus_laps.validlap_times_dict_sorted.keys())[1])
+        Lap.Lap(continus_laps, 0, list(continus_laps.validlap_times_dict_sorted.keys())[1])
     ]  # empty means do not show time delta
     if len(laps_compare) > 0:        
         lap_checkpoints = laps_compare[0]        

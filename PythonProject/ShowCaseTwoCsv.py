@@ -7,8 +7,8 @@ from Structures.ContinusLapsConsts import *
 from Utils.WheelUtil import calculate_wheel_diameter
 
 def main():
-    csv_paths = ['../SampleData/telemetry-v1-2024-06-16-18_33_19.csv',
-                 '../SampleData/telemetry-v1-2025-01-05-16_44_02.csv', ]
+    csv_paths = ['../SampleData/telemetry-v1-2025-01-05-16_44_02.csv',
+                 '../SampleData/telemetry-v1-2025-01-11-14_41_45.csv', ]
     
     dfs = []
     max_kmh_every_laps = []
@@ -19,14 +19,14 @@ def main():
         print('max_kmh_every_lap:', max_kmh_every_lap)
         max_kmh_every_laps.append(max_kmh_every_lap)
 
-    # original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
-    # adjust_ratios = [calculate_wheel_diameter(265, 35, 18) / original_wheel_diameter,
-    #                  calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter]
+    original_wheel_diameter = calculate_wheel_diameter(235, 40, 19)
+    adjust_ratios = [calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter,
+                     calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter]
 
-    adjust_ratios = [
-        ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[0], 1, [171.49, 164.35, 170.51, 164.38]),
-        ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[1], 2, [169.9, 169.68, 159.88, 167.61])
-    ]
+    # adjust_ratios = [
+    #     ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[0], 1, [171.49, 164.35, 170.51, 164.38]),
+    #     ContinusLapsPrepare.get_avg_adjust_ratio(max_kmh_every_laps[1], 2, [169.9, 169.68, 159.88, 167.61])
+    # ]
     print('adjust_ratios:', adjust_ratios)
 
     continus_lapss = []
