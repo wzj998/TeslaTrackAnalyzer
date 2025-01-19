@@ -77,6 +77,8 @@ def set_lims_grid(ax, df_laps_2_draw_copy):
     ax.set_xlim(left=x_center - max_width_height / 2, right=x_center + max_width_height / 2)
     ax.set_ylim(bottom=y_center - max_width_height / 2, top=y_center + max_width_height / 2)
 
+    ax.set_aspect('equal')
+
     # set grid
     ax.grid()
 
