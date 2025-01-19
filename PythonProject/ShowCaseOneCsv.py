@@ -8,7 +8,7 @@ from Utils.WheelUtil import calculate_wheel_diameter
 
 
 def main():
-    csv_path = '../SampleData/telemetry-v1-2025-01-05-16_44_02.csv'
+    csv_path = '../SampleData/telemetry-v1-2025-01-11-15_44_35.csv'
 
     continus_lapss = []
     longtitude_start = None

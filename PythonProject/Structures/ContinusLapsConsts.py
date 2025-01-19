@@ -1,3 +1,5 @@
+KMH_DIV_MPH = 1.60934
+
 # Index(['Lap', 'Elapsed Time (ms)', 'Elapsed Time (mm:ss.ms)',
 #        'Total Time (ms)', 'Total Time (mm:ss.ms)', 'Speed (MPH)',
 #        'Speed (KMH)', 'Latitude (decimal)', 'Longitude (decimal)',

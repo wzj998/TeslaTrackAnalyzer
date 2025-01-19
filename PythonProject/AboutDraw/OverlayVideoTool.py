@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image, ImageFont, ImageDraw
 
 from AboutDraw import OverlayImgTool
-from Structures import ContinusLaps, Lap
+from Structures import ContinusLaps, Lap, ContinusLapsPrepare
 from Structures.ContinusLapsConsts import *
 
 
@@ -90,15 +90,7 @@ def generate_overlay_video_img_paths(continus_laps: ContinusLaps.ContinusLaps,
     power_level_min = df[COL_NAME_POWER_LEVEL].min()
     power_level_max = df[COL_NAME_POWER_LEVEL].max()
 
-    earth_radius_2_use, latitude_origin_rad = ContinusLaps.calculate_earth_radius_2_use(continus_laps.altitude,
-                                                                                        continus_laps.latitude_start)
-    # 先根据万有引力计算g
-    m_earth = 5.9722 * 10 ** 24
-    g = 6.67408 * 10 ** -11 * m_earth / (earth_radius_2_use ** 2)
-    # 再计算自转加速度
-    w = 2 * math.pi / 86400 * math.cos(latitude_origin_rad)
-    a = w ** 2 * earth_radius_2_use
-    g -= a
+    g = ContinusLapsPrepare.get_g(continus_laps.altitude, continus_laps.latitude_start)
 
     max_accel_length = 0.1
     for _, row in df.iterrows():

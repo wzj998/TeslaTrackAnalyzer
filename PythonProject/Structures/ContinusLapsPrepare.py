@@ -14,7 +14,7 @@ def get_max_kmh_every_lap_before_adjust(df):
     laps = df[COL_NAME_LAP].unique()
     for lap in laps:
         df_lap = df[df[COL_NAME_LAP] == lap]
-        ans[lap] = df_lap[COL_NAME_SPEED_MPH].max() * 1.60934  # 转换为km/h
+        ans[lap] = df_lap[COL_NAME_SPEED_MPH].max() * KMH_DIV_MPH  # 转换为km/h
     return ans
 
 
@@ -43,7 +43,7 @@ def get_avg_adjust_ratio(max_kmh_every_lap, lap_index_start, max_kmh_gps_list):
 
 def add_kmh_col(df, adjust_ratio):
     df.insert(df.columns.get_loc(COL_NAME_SPEED_MPH) + 1, COL_NAME_SPEED_KMH, 0)
-    df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * 1.60934 * adjust_ratio)
+    df[COL_NAME_SPEED_KMH] = df[COL_NAME_SPEED_MPH].apply(lambda x: x * KMH_DIV_MPH * adjust_ratio)
 
 
 def calculate_speed_gps(df, x, ms_smooth_half_window):
@@ -166,3 +166,15 @@ def get_avg_timing_line_x_y_m(df):
     avg_x_m = rows_lap_diff[COL_NAME_X_M].mean()
     avg_y_m = rows_lap_diff[COL_NAME_Y_M].mean()
     return avg_x_m, avg_y_m
+
+def get_g(altitude, latitude):
+    earth_radius_2_use, latitude_origin_rad = calculate_earth_radius_2_use(altitude, latitude)
+    # 先根据万有引力计算g
+    m_earth = 5.9722 * 10 ** 24
+    g = 6.67408 * 10 ** -11 * m_earth / (earth_radius_2_use ** 2)
+    # 再计算自转加速度
+    w = 2 * math.pi / 86400 * math.cos(latitude_origin_rad)
+    a = w ** 2 * earth_radius_2_use
+    g -= a
+
+    return g
