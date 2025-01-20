@@ -16,13 +16,11 @@ def do_convert(lap):
     rows_converted = []
     dist = 0
     df = lap.df_lap
-    # remain unique timestamp of df
-    df = df.drop_duplicates(subset=[COL_NAME_TOTAL_MS])
-    # update index
-    df.reset_index(drop=True, inplace=True)
-    for index, row in df.iterrows():
-        if index > 0:
-            row_last = df.iloc[index - 1]
+
+    for i in range(len(df)):
+        row = df.iloc[i].copy()
+        if i > 0:
+            row_last = df.iloc[i - 1].copy()
             dist += math.sqrt((row[COL_NAME_X_M] - row_last[COL_NAME_X_M]) ** 2 + (row[COL_NAME_Y_M] - row_last[COL_NAME_Y_M]) ** 2)
         row[COL_NAME_DIST_CONVERTED] = dist
         row[COL_NAME_SPEED_CONVERTED] = row[COL_NAME_SPEED_KMH]
@@ -46,8 +44,7 @@ def main():
     continus_laps = ContinusLaps.ContinusLaps(df,
                                                     calculate_wheel_diameter(295, 35, 18) / original_wheel_diameter,
                                                     longtitude_start, latitude_start,
-                                                    altitude)
-    g = ContinusLapsPrepare.get_g(altitude, latitude_start)
+                                                    altitude)    
     
     lap_indexes_2_fastest = list(continus_laps.validlap_times_dict_sorted.keys())[0]
     lap_fastest = Lap.Lap(continus_laps, 0, lap_indexes_2_fastest)
