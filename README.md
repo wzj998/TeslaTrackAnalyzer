@@ -1,10 +1,12 @@
 **English Version:**
 # TeslaTrackAnalyzer
-Draw graphs using data recorded by Tesla Track Mode and visualize this data into video(in future).
+Draw graphs using data recorded by Tesla Track Mode and visualize this data into video with overlays of speed, throttle, brake, g-meter, etc.
 
 **Example：**
 
-Just run ShowCaseOneCsv.py and ShowCaseTwoCsv.py in folder PythonProject.
+Just run ShowCaseOneCsv.py and ShowCaseTwoCsv.py in folder PythonProject to generate graphs.
+
+To generate overlay videos, run GenerateOverlayVideoOneCsv.py and GenerateOverlayVideoTwoCsv.py in folder PythonProject.
 
 The following are examples of the drawn graphs. The results may not be exactly the same as the actual output, serving only as representations of several typical graphs:
 <div style="text-align:center">
@@ -15,6 +17,9 @@ The following are examples of the drawn graphs. The results may not be exactly t
 </div>
 <div style="text-align:center">
     <img src="ReadMeImgs/GPSTrack.png" alt="Your Image Description">
+</div>
+<div style="text-align:center">
+    <img src="ReadMeImgs/videooverlay.jpg" alt="Video Overlay Example">
 </div>
 
 
@@ -31,17 +36,18 @@ Additionally, if you are only creating line graphs with time as the x-axis or pl
 
 **TODO:**
 
-1. Visualize the data into video, like some overlays of speed, throttle, brake, g-meter...
-2. If someone has recorded track data using methods other than Tesla's Track Mode and wishes to use this project but finds that the current project doesn't perfectly adapt, I will enhance the project's versatility. This may include the ability to plot distance-based graphs without needing to meet the assumptions mentioned above, providing a user interface (UI) to cater to a wider range of needs...
+1. If someone has recorded track data using methods other than Tesla's Track Mode and wishes to use this project but finds that the current project doesn't perfectly adapt, I will enhance the project's versatility. This may include the ability to plot distance-based graphs without needing to meet the assumptions mentioned above, providing a user interface (UI) to cater to a wider range of needs...
 
 
 **中文版：**
 # 特斯拉赛道模式数据分析器
-使用特斯拉赛道模式记录的数据绘制图形，并将这些数据可视化为视频（未来的计划）。
+使用特斯拉赛道模式记录的数据绘制图形，并将这些数据可视化为视频，可在视频上叠加速度、油门、刹车、g值等图层。
 
 **示例：**
 
-只需运行 PythonProject 文件夹中的 ShowCaseOneCsv.py 和 ShowCaseTwoCsv.py 。
+只需运行 PythonProject 文件夹中的 ShowCaseOneCsv.py 和 ShowCaseTwoCsv.py 来生成图表。
+
+要生成叠加视频，请运行 PythonProject 文件夹中的 GenerateOverlayVideoOneCsv.py 和 GenerateOverlayVideoTwoCsv.py。
 
 以下是绘制图表的示例。结果可能与实际输出不完全相同，仅用作几种典型图表的代表：
 <div style="text-align:center">
@@ -52,6 +58,9 @@ Additionally, if you are only creating line graphs with time as the x-axis or pl
 </div>
 <div style="text-align:center">
     <img src="ReadMeImgs/GPSTrack.png" alt="Your Image Description">
+</div>
+<div style="text-align:center">
+    <img src="ReadMeImgs/videooverlay.jpg" alt="视频叠加示例">
 </div>
 
 **注意：**
@@ -67,5 +76,4 @@ Additionally, if you are only creating line graphs with time as the x-axis or pl
 
 **待办事项：**
 
-1. 将数据可视化为视频，例如叠加一些速度、油门、刹车、g值的图层...
-2. 如果有人使用特斯拉赛道模式以外的方式录制了赛道数据，想要使用此项目但发现当前项目不能完美适配，我将增强项目的通用性。这可能包括无需满足上述假设就能绘制横坐标为路程的log对比图，提供用户界面（UI）以满足更广泛的需求...
+1. 如果有人使用特斯拉赛道模式以外的方式录制了赛道数据，想要使用此项目但发现当前项目不能完美适配，我将增强项目的通用性。这可能包括无需满足上述假设就能绘制横坐标为路程的log对比图，提供用户界面（UI）以满足更广泛的需求...
