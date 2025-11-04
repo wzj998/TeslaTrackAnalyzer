@@ -19,7 +19,7 @@ The following are examples of the drawn graphs. The results may not be exactly t
     <img src="ReadMeImgs/GPSTrack.png" alt="Your Image Description">
 </div>
 <div style="text-align:center">
-    <img src="ReadMeImgs/videooverlay.jpg" alt="Video Overlay Example">
+    <img src="ReadMeImgs/VideoOverlay.jpg" alt="Video Overlay Example">
 </div>
 
 
@@ -60,7 +60,7 @@ Additionally, if you are only creating line graphs with time as the x-axis or pl
     <img src="ReadMeImgs/GPSTrack.png" alt="Your Image Description">
 </div>
 <div style="text-align:center">
-    <img src="ReadMeImgs/videooverlay.jpg" alt="视频叠加示例">
+    <img src="ReadMeImgs/VideoOverlay.jpg" alt="视频叠加示例">
 </div>
 
 **注意：**
